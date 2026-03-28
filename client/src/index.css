@@ -163,7 +163,7 @@
     animation: fadeIn 0.5s ease-in-out;
   }
 
-  /** Home trending strip — slow continuous horizontal drift (duplicate row = 50% loop). */
+  /** Home trending strip — one loop matches 5starhookah ticker (--ticker-delay, duplicate row = 50%). */
   @keyframes trending-marquee {
     from {
       transform: translate3d(0, 0, 0);
@@ -174,7 +174,7 @@
   }
 
   .animate-trending-marquee {
-    animation: trending-marquee 150s linear infinite;
+    animation: trending-marquee 46s linear infinite;
     will-change: transform;
   }
 
