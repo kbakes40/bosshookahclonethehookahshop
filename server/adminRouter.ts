@@ -28,6 +28,7 @@ import {
   type CostLookupResult,
 } from "./costLookupService";
 import { lookupProductCost, wholesaleCacheKey } from "../lib/priceLookup";
+import { invalidateStorefrontCatalogCaches } from "./storeCatalogCache";
 
 function formatSupabaseErr(err: PostgrestError): string {
   return [err.message, err.details, err.hint, err.code ? `(${err.code})` : ""]
@@ -365,6 +366,7 @@ export const adminRouter = router({
             });
           }
         }
+        invalidateStorefrontCatalogCaches();
         return { success: true as const, mode: input.mode, count: rows.length };
       }
 
@@ -382,6 +384,7 @@ export const adminRouter = router({
           });
         }
       }
+      invalidateStorefrontCatalogCaches();
       return { success: true as const, mode: input.mode, count: rows.length };
     }),
 
@@ -507,6 +510,7 @@ export const adminRouter = router({
       });
 
       if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
+      invalidateStorefrontCatalogCaches();
       return { success: true };
     }),
 

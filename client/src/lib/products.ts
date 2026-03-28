@@ -28,6 +28,8 @@ export interface Product {
   variants?: ProductVariant[];
   /** Shipping weight per unit (lb). If omitted, shared shipping logic uses 1 lb per unit. */
   weightLb?: number;
+  /** Latest row `created_at` among merged SKUs; used for "newest" sort only. */
+  createdAt?: string;
 }
 
 export const categories = [

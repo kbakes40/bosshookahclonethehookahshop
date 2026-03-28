@@ -7,49 +7,64 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
-import { useStorefrontCatalog } from "@/hooks/useStorefrontCatalog";
+import { trpc } from "@/lib/trpc";
 
 export default function Collection() {
   const [location] = useLocation();
   const [, paramsFromRoute] = useRoute("/collections/:category");
-  
+
   // Extract category from URL path
   const getCategoryFromPath = () => {
     if (paramsFromRoute?.category) return paramsFromRoute.category;
-    const path = location.split('/')[1];
-    return path || 'all';
+    const path = location.split("/")[1];
+    return path || "all";
   };
-  
+
   const category = getCategoryFromPath();
   const [priceMin, setPriceMin] = useState("0");
   const [priceMax, setPriceMax] = useState("999");
-  const [sortBy, setSortBy] = useState("best-selling");
+  const [sortBy, setSortBy] = useState<
+    "best-selling" | "price-low" | "price-high" | "newest"
+  >("best-selling");
   const [showInStock, setShowInStock] = useState(false);
   const [showOutOfStock, setShowOutOfStock] = useState(false);
 
-  const { products: catalog, query: catalogQuery } = useStorefrontCatalog();
+  const priceMinN = parseFloat(priceMin) || 0;
+  const priceMaxN = parseFloat(priceMax) || 999;
 
-  const displayProducts = useMemo(() => {
-    return category === "all"
-      ? catalog
-      : catalog.filter(p => p.category === category);
-  }, [catalog, category]);
+  const catalogPage = trpc.store.listProductsPage.useInfiniteQuery(
+    {
+      category,
+      priceMin: priceMinN,
+      priceMax: priceMaxN,
+      showInStock,
+      showOutOfStock,
+      sortBy,
+      limit: 24,
+    },
+    {
+      initialPageParam: 0,
+      getNextPageParam: last => last.nextCursor ?? undefined,
+      staleTime: 60_000,
+    }
+  );
 
-  const filteredProducts = displayProducts.filter(p => {
-    const price = p.salePrice || p.price;
-    const inPriceRange = price >= parseFloat(priceMin) && price <= parseFloat(priceMax);
-    const stockFilter = (!showInStock && !showOutOfStock) || 
-                       (showInStock && p.inStock) || 
-                       (showOutOfStock && !p.inStock);
-    return inPriceRange && stockFilter;
-  });
+  const filteredProducts = useMemo(
+    () => catalogPage.data?.pages.flatMap(p => p.products) ?? [],
+    [catalogPage.data?.pages]
+  );
 
-  const inStockCount = displayProducts.filter(p => p.inStock).length;
-  const outOfStockCount = displayProducts.filter(p => !p.inStock).length;
+  const firstPage = catalogPage.data?.pages[0];
+  const inStockCount = firstPage?.inStockCount ?? 0;
+  const outOfStockCount = firstPage?.outOfStockCount ?? 0;
+  const totalFiltered = firstPage?.total ?? 0;
 
-  const categoryTitle = category === "all" ? "All Products" : 
-                       category === "bowls" ? "Hookah Bowls" : 
-                       category.charAt(0).toUpperCase() + category.slice(1);
+  const categoryTitle =
+    category === "all"
+      ? "All Products"
+      : category === "bowls"
+        ? "Hookah Bowls"
+        : category.charAt(0).toUpperCase() + category.slice(1);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,19 +74,19 @@ export default function Collection() {
         <div className="container">
           {/* Breadcrumb */}
           <div className="mb-6 text-sm">
-            <Link href="/" className="hover:text-primary">Home</Link>
+            <Link href="/" className="hover:text-primary">
+              Home
+            </Link>
             <span className="mx-2">/</span>
             <span className="capitalize">{categoryTitle}</span>
           </div>
 
           {/* Page Title & Description */}
           <div className="mb-8">
-            <h1 className="text-5xl font-display font-black mb-4">
-              {categoryTitle}
-            </h1>
+            <h1 className="text-5xl font-display font-black mb-4">{categoryTitle}</h1>
             <p className="text-muted-foreground max-w-3xl">
-              Discover an exceptional range of premium products from top brands worldwide. 
-              Experience rich, long-lasting sessions with these high-quality items crafted for perfection.
+              Discover an exceptional range of premium products from top brands worldwide. Experience
+              rich, long-lasting sessions with these high-quality items crafted for perfection.
             </p>
           </div>
 
@@ -84,9 +99,11 @@ export default function Collection() {
                 {/* Sort */}
                 <div className="mb-6">
                   <label className="block font-semibold mb-2 text-sm">Sort by:</label>
-                  <select 
+                  <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={e =>
+                      setSortBy(e.target.value as typeof sortBy)
+                    }
                     className="w-full brutalist-border px-3 py-2 bg-background"
                   >
                     <option value="best-selling">Best selling</option>
@@ -100,19 +117,19 @@ export default function Collection() {
                 <div className="mb-6">
                   <h4 className="font-semibold mb-3 text-sm">Availability</h4>
                   <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={showInStock}
-                      onChange={(e) => setShowInStock(e.target.checked)}
+                      onChange={e => setShowInStock(e.target.checked)}
                       className="w-4 h-4"
                     />
                     <span className="text-sm">In stock ({inStockCount})</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={showOutOfStock}
-                      onChange={(e) => setShowOutOfStock(e.target.checked)}
+                      onChange={e => setShowOutOfStock(e.target.checked)}
                       className="w-4 h-4"
                     />
                     <span className="text-sm">Out of stock ({outOfStockCount})</span>
@@ -123,7 +140,8 @@ export default function Collection() {
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-sm">Price</h4>
-                    <button 
+                    <button
+                      type="button"
                       onClick={() => {
                         setPriceMin("0");
                         setPriceMax("999");
@@ -134,19 +152,19 @@ export default function Collection() {
                     </button>
                   </div>
                   <div className="flex gap-2 items-center">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       placeholder="0"
                       value={priceMin}
-                      onChange={(e) => setPriceMin(e.target.value)}
+                      onChange={e => setPriceMin(e.target.value)}
                       className="w-full brutalist-border px-2 py-1 text-sm"
                     />
                     <span className="text-sm">to</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       placeholder="999"
                       value={priceMax}
-                      onChange={(e) => setPriceMax(e.target.value)}
+                      onChange={e => setPriceMax(e.target.value)}
                       className="w-full brutalist-border px-2 py-1 text-sm"
                     />
                   </div>
@@ -162,19 +180,33 @@ export default function Collection() {
             <div className="flex-1">
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {catalogQuery.isLoading && catalog.length === 0
+                  {catalogPage.isPending && filteredProducts.length === 0
                     ? "Loading products…"
-                    : `${filteredProducts.length} products`}
+                    : `${totalFiltered} products`}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                {filteredProducts.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
 
-              {filteredProducts.length === 0 && (
+              {catalogPage.hasNextPage && (
+                <div className="flex justify-center mt-10">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="brutalist-border font-bold"
+                    onClick={() => catalogPage.fetchNextPage()}
+                    disabled={catalogPage.isFetchingNextPage}
+                  >
+                    {catalogPage.isFetchingNextPage ? "Loading…" : "Load more"}
+                  </Button>
+                </div>
+              )}
+
+              {!catalogPage.isPending && filteredProducts.length === 0 && (
                 <div className="text-center py-16">
                   <p className="text-2xl font-display font-bold mb-2">No products found</p>
                   <p className="text-muted-foreground">Try adjusting your filters</p>

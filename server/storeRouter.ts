@@ -7,11 +7,13 @@ import { router, publicProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 import { mapStoreSettingsRow } from "./_core/supabaseMappers";
+import { getCachedGroupedStorefrontProducts, getCachedHomeHighlights } from "./storeCatalogCache";
+import { getStorefrontProductById } from "./storeCatalog";
 import {
-  fetchAllBhProductRows,
-  getStorefrontProductById,
-  groupBhProductRowsToStorefrontProducts,
-} from "./storeCatalog";
+  filterProductsForGrid,
+  searchProductsByQuery,
+  sortStorefrontProducts,
+} from "./storeCatalogQuery";
 
 const defaultStoreSettings = () =>
   mapStoreSettingsRow({
@@ -48,10 +50,130 @@ export const storeRouter = router({
     return mapStoreSettingsRow((data ?? null) as Record<string, unknown> | null) ?? defaultStoreSettings();
   }),
 
-  /** Full storefront catalog from `bh_products` (grouped catalog SKUs → variants). */
+  /** Full storefront catalog (cached ~45s). Prefer `listProductsPage` / `searchProducts` on the client. */
   listProducts: publicProcedure.query(async () => {
-    const rows = await fetchAllBhProductRows();
-    return groupBhProductRowsToStorefrontProducts(rows);
+    return getCachedGroupedStorefrontProducts();
+  }),
+
+  /** Trending + featured sections only (cached ~30s). */
+  listHomeHighlights: publicProcedure.query(async () => {
+    return getCachedHomeHighlights();
+  }),
+
+  listProductsPage: publicProcedure
+    .input(
+      z.object({
+        category: z.string().default("all"),
+        brand: z.string().optional(),
+        priceMin: z.number().min(0).default(0),
+        priceMax: z.number().min(0).default(999_999),
+        showInStock: z.boolean().default(false),
+        showOutOfStock: z.boolean().default(false),
+        sortBy: z
+          .enum(["best-selling", "price-low", "price-high", "newest"])
+          .default("best-selling"),
+        limit: z.number().min(1).max(48).default(24),
+        cursor: z.number().min(0).optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      const offset = input.cursor ?? 0;
+      const all = await getCachedGroupedStorefrontProducts();
+      const base =
+        input.category === "all" ? all : all.filter(p => p.category === input.category);
+      const inStockCount = base.filter(p => p.inStock).length;
+      const outOfStockCount = base.filter(p => !p.inStock).length;
+
+      let filtered = filterProductsForGrid(all, {
+        category: input.category,
+        brand: input.brand,
+        priceMin: input.priceMin,
+        priceMax: input.priceMax,
+        showInStock: input.showInStock,
+        showOutOfStock: input.showOutOfStock,
+      });
+      filtered = sortStorefrontProducts(filtered, input.sortBy);
+      const total = filtered.length;
+      const products = filtered.slice(offset, offset + input.limit);
+      const nextCursor =
+        offset + input.limit < total ? offset + input.limit : null;
+
+      return {
+        products,
+        total,
+        inStockCount,
+        outOfStockCount,
+        nextCursor,
+      };
+    }),
+
+  searchProducts: publicProcedure
+    .input(
+      z.object({
+        q: z.string(),
+        limit: z.number().min(1).max(48).default(24),
+        cursor: z.number().min(0).optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      const offset = input.cursor ?? 0;
+      const all = await getCachedGroupedStorefrontProducts();
+      const found = searchProductsByQuery(all, input.q);
+      const sorted = sortStorefrontProducts(found, "best-selling");
+      const total = sorted.length;
+      const products = sorted.slice(offset, offset + input.limit);
+      const nextCursor =
+        offset + input.limit < total ? offset + input.limit : null;
+      return { products, total, nextCursor };
+    }),
+
+  listRelatedProducts: publicProcedure
+    .input(
+      z.object({
+        category: z.string(),
+        excludeId: z.string(),
+        limit: z.number().min(1).max(24).default(8),
+      })
+    )
+    .query(async ({ input }) => {
+      const all = await getCachedGroupedStorefrontProducts();
+      const filtered = all.filter(
+        p => p.category === input.category && p.id !== input.excludeId
+      );
+      const sorted = sortStorefrontProducts(filtered, "best-selling");
+      return sorted.slice(0, input.limit);
+    }),
+
+  /** Distinct brands per category for nav dropdowns (lightweight vs `listProducts`). */
+  listNavBrandIndex: publicProcedure.query(async () => {
+    const { data, error } = await supabaseAdmin
+      .from("bh_products")
+      .select("brand,category")
+      .order("category", { ascending: true })
+      .order("brand", { ascending: true });
+
+    if (error) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
+    }
+
+    const byCat = new Map<string, Set<string>>();
+    for (const row of data ?? []) {
+      const r = row as { brand?: string | null; category?: string | null };
+      const category = String(r.category ?? "");
+      const brand = String(r.brand ?? "").trim();
+      if (!brand) continue;
+      if (!byCat.has(category)) byCat.set(category, new Set());
+      byCat.get(category)!.add(brand);
+    }
+
+    const sorted = (s: Set<string>) =>
+      Array.from(s).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+    return {
+      shisha: sorted(byCat.get("shisha") ?? new Set()),
+      charcoal: sorted(byCat.get("charcoal") ?? new Set()),
+      vapes: sorted(byCat.get("vapes") ?? new Set()),
+    };
   }),
 
   /** Single product by storefront id (catalog parent key, e.g. `50`, or `bh_products.id` UUID). */

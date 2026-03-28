@@ -5,22 +5,28 @@ import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { useStorefrontCatalog } from "@/hooks/useStorefrontCatalog";
-import { Button } from "@/components/ui/button";
+import { products as staticCatalog } from "@/lib/products";
+import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { products: catalog } = useStorefrontCatalog();
-  const trendingProducts = useMemo(
-    () => catalog.filter(p => p.trending),
-    [catalog]
+  const staticHighlights = useMemo(
+    () => ({
+      trending: staticCatalog.filter(p => p.trending),
+      featured: staticCatalog.filter(p => p.featured),
+    }),
+    []
   );
-  const featuredProducts = useMemo(
-    () => catalog.filter(p => p.featured),
-    [catalog]
-  );
+
+  const highlights = trpc.store.listHomeHighlights.useQuery(undefined, {
+    staleTime: 60_000,
+    placeholderData: staticHighlights,
+  });
+
+  const trendingProducts = highlights.data?.trending ?? staticHighlights.trending;
+  const featuredProducts = highlights.data?.featured ?? staticHighlights.featured;
 
   // Set page title for SEO (30-60 characters)
   useEffect(() => {
@@ -150,15 +156,12 @@ export default function Home() {
             
             <div className="overflow-x-auto pb-4 -mx-4 px-4">
               <div className="flex gap-6" style={{ width: 'max-content' }}>
-                {trendingProducts.map((product) => (
+                {trendingProducts.map((product, i) => (
                   <div key={product.id} className="w-64 flex-shrink-0">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-                {/* Duplicate for infinite scroll effect */}
-                {trendingProducts.map((product) => (
-                  <div key={`dup-${product.id}`} className="w-64 flex-shrink-0">
-                    <ProductCard product={product} />
+                    <ProductCard
+                      product={product}
+                      imageFetchPriority={i === 0 ? "high" : undefined}
+                    />
                   </div>
                 ))}
               </div>

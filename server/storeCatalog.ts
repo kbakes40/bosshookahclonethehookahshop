@@ -3,6 +3,7 @@
  */
 import type { Product, ProductVariant } from "../client/src/lib/products";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
+import { BH_PRODUCT_STOREFRONT_LIST_COLUMNS } from "./storeCatalogColumns";
 
 export type BhProductRow = Record<string, unknown>;
 
@@ -19,7 +20,7 @@ function pushCatalogRow(map: Map<string, BhProductRow[]>, key: string, row: BhPr
 }
 
 /** Parse `catalog:parent` / `catalog:parent:variant` / other SKUs. */
-function catalogKeyFromSku(sku: string): string | null {
+export function catalogKeyFromSku(sku: string): string | null {
   const m = /^catalog:([^:]+)(?::(.+))?$/.exec(sku.trim());
   return m ? m[1] : null;
 }
@@ -42,6 +43,15 @@ function baseTitleFromName(fullName: string): string {
   const idx = fullName.indexOf(" — ");
   if (idx === -1) return fullName.trim();
   return fullName.slice(0, idx).trim();
+}
+
+function latestCreatedIso(rows: BhProductRow[]): string | undefined {
+  let best = 0;
+  for (const r of rows) {
+    const t = new Date(String(r.created_at ?? 0)).getTime();
+    if (!Number.isNaN(t) && t > best) best = t;
+  }
+  return best > 0 ? new Date(best).toISOString() : undefined;
 }
 
 /** Storefront-only fixes for catalog keys; keep in sync with migrations when possible. */
@@ -81,6 +91,7 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
   const src = base || variantRows[0] || first;
   const descRow = [base, ...variantRows].find(r => r?.description);
   const wLb = weightLbFromRows(rows);
+  const createdAt = latestCreatedIso(rows);
 
   return applyCatalogStorefrontOverride(
     {
@@ -100,6 +111,7 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
       description: descRow?.description ? String(descRow.description) : undefined,
       variants: variants.length > 0 ? variants : undefined,
       ...(wLb != null ? { weightLb: wLb } : {}),
+      ...(createdAt ? { createdAt } : {}),
     },
     key
   );
@@ -108,6 +120,7 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
 export function mapNonCatalogRow(row: BhProductRow): Product {
   const w =
     row.weight_lb != null && Number(row.weight_lb) > 0 ? Number(row.weight_lb) : undefined;
+  const createdAt = row.created_at ? String(row.created_at) : undefined;
   return {
     id: String(row.id ?? ""),
     name: String(row.name ?? ""),
@@ -122,6 +135,7 @@ export function mapNonCatalogRow(row: BhProductRow): Product {
     trending: Boolean(row.trending),
     description: row.description ? String(row.description) : undefined,
     ...(w != null ? { weightLb: w } : {}),
+    ...(createdAt ? { createdAt } : {}),
   };
 }
 
@@ -148,14 +162,74 @@ export function groupBhProductRowsToStorefrontProducts(rows: BhProductRow[]): Pr
   );
 }
 
-export async function fetchAllBhProductRows(): Promise<BhProductRow[]> {
+/** Slim row fetch for storefront list + grouping (smaller payload than `select *`). */
+export async function fetchStorefrontListRows(): Promise<BhProductRow[]> {
   const { data, error } = await supabaseAdmin
     .from("bh_products")
-    .select("*")
+    .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
   return (data ?? []) as BhProductRow[];
+}
+
+export async function fetchAllBhProductRows(): Promise<BhProductRow[]> {
+  return fetchStorefrontListRows();
+}
+
+/**
+ * Rows flagged trending/featured plus any sibling catalog SKUs needed for correct variant merge.
+ * Two round trips instead of loading the entire `bh_products` table for the home page.
+ */
+export async function fetchAndGroupHomeHighlightProducts(): Promise<{
+  trending: Product[];
+  featured: Product[];
+}> {
+  const { data: flagged, error } = await supabaseAdmin
+    .from("bh_products")
+    .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)
+    .or("trending.eq.true,featured.eq.true")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  const firstPass = (flagged ?? []) as BhProductRow[];
+
+  const catalogKeys = new Set<string>();
+  for (const row of firstPass) {
+    const key = catalogKeyFromSku(String(row.sku ?? ""));
+    if (key) catalogKeys.add(key);
+  }
+
+  let mergedRows = firstPass;
+  if (catalogKeys.size > 0) {
+    const orParts: string[] = [];
+    for (const k of Array.from(catalogKeys)) {
+      orParts.push(`sku.eq.catalog:${k}`);
+      orParts.push(`sku.like.catalog:${k}:%`);
+    }
+    const { data: groupRows, error: e2 } = await supabaseAdmin
+      .from("bh_products")
+      .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)
+      .or(orParts.join(","));
+
+    if (e2) throw new Error(e2.message);
+    const byId = new Map<string, BhProductRow>();
+    for (const r of firstPass) byId.set(String(r.id), r);
+    for (const r of groupRows ?? []) {
+      const br = r as BhProductRow;
+      byId.set(String(br.id), br);
+    }
+    mergedRows = Array.from(byId.values());
+  }
+
+  const products = groupBhProductRowsToStorefrontProducts(mergedRows);
+  const sortName = (a: Product, b: Product) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+
+  return {
+    trending: products.filter(p => p.trending).sort(sortName),
+    featured: products.filter(p => p.featured).sort(sortName),
+  };
 }
 
 async function loadCatalogGroupByKey(key: string): Promise<Product | null> {

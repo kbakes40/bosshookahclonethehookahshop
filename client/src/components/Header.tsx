@@ -8,7 +8,7 @@ import { Input } from "./ui/input";
 import { useMemo, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import PromoBar from "./PromoBar";
-import { useStorefrontCatalog } from "@/hooks/useStorefrontCatalog";
+import { trpc } from "@/lib/trpc";
 import { useSupabaseAuth } from "@/lib/SupabaseAuthProvider";
 
 export default function Header() {
@@ -21,24 +21,20 @@ export default function Header() {
   const { cartCount, openCart } = useCart();
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, signInWithGoogle, logout } = useSupabaseAuth();
-  const { products: catalogProducts } = useStorefrontCatalog();
+  const { data: navBrands } = trpc.store.listNavBrandIndex.useQuery(undefined, {
+    staleTime: 5 * 60_000,
+    gcTime: 15 * 60_000,
+  });
 
-  const brandsByCategory = useMemo(() => {
-    const forCat = (cat: string) =>
-      Array.from(
-        new Set(
-          catalogProducts
-            .filter(p => p.category === cat)
-            .map(p => p.brand)
-            .filter(Boolean)
-        )
-      ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
-    return {
-      shisha: forCat("shisha"),
-      charcoal: forCat("charcoal"),
-      vapes: forCat("vapes"),
-    };
-  }, [catalogProducts]);
+  const brandsByCategory = useMemo(
+    () =>
+      navBrands ?? {
+        shisha: [] as string[],
+        charcoal: [] as string[],
+        vapes: [] as string[],
+      },
+    [navBrands]
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

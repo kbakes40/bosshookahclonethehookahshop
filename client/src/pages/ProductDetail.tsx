@@ -1,7 +1,7 @@
 // Product Detail Page - Neo-Brutalism meets Luxury Retail
 // Features: Image gallery, product info, add to cart, related products
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,7 +12,6 @@ import { Heart, Share2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { trpc } from "@/lib/trpc";
-import { useStorefrontCatalog } from "@/hooks/useStorefrontCatalog";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
 import { FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 
@@ -35,8 +34,17 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState("");
   const { addToCart } = useCart();
-  const { products: catalog } = useStorefrontCatalog();
   const { formatUsd } = useShopCurrency();
+
+  const relatedQuery = trpc.store.listRelatedProducts.useQuery(
+    {
+      category: product?.category ?? "",
+      excludeId: product?.id ?? "",
+      limit: 4,
+    },
+    { enabled: Boolean(product?.category && product?.id) }
+  );
+  const relatedProducts = relatedQuery.data ?? [];
 
   useEffect(() => {
     if (product?.variants?.length) {
@@ -46,14 +54,6 @@ export default function ProductDetail() {
     }
     setSelectedImage(0);
   }, [product?.id, product?.variants]);
-
-  const relatedProducts = useMemo(
-    () =>
-      product
-        ? catalog.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
-        : [],
-    [catalog, product]
-  );
 
   if (product === undefined) {
     return (
