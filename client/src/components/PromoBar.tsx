@@ -2,10 +2,11 @@
 // Features: Auto-scrolling text with promotional messages
 
 import { useEffect, useState } from "react";
+import { FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 
 const promoMessages = [
   "🔥 NEW ARRIVALS: Premium Hookahs Just Dropped!",
-  "💨 FREE SHIPPING on orders over $75",
+  `💨 FREE SHIPPING on orders over $${FREE_SHIPPING_THRESHOLD_USD}`,
   "⭐ TRENDING: Exotic Shisha Flavors Now Available",
   "🎁 SPECIAL OFFER: Buy 2 Get 1 Free on Select Items",
   "🚚 WHOLESALE PRICING: Contact Us for Bulk Orders"

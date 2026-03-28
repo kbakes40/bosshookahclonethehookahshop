@@ -20,6 +20,62 @@ import { useShopCurrency } from "@/contexts/CurrencyContext";
 import { FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 import { getAuthRedirectOrigin } from "@/lib/authRedirect";
 
+const SHARE_DESCRIPTION_MAX_CHARS = 600;
+
+function plainTextFromHtml(html: string, maxLen: number): string {
+  const raw = html.trim();
+  if (!raw) return "";
+  const stripped = raw
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/\s+/g, " ")
+    .trim();
+  if (stripped.length <= maxLen) return stripped;
+  return `${stripped.slice(0, maxLen - 1).trim()}…`;
+}
+
+function toAbsoluteImageUrl(src: string, origin: string): string {
+  const s = src.trim();
+  if (!s) return "";
+  if (/^https?:\/\//i.test(s)) return s;
+  const path = s.startsWith("/") ? s : `/${s}`;
+  return `${origin.replace(/\/$/, "")}${path}`;
+}
+
+async function imageFileForShare(imageUrl: string, filenameBase: string): Promise<File | null> {
+  try {
+    const res = await fetch(imageUrl, { mode: "cors", cache: "force-cache" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    if (!blob.type.startsWith("image/")) return null;
+    const ext =
+      blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpeg";
+    const safe =
+      filenameBase.replace(/[^\w-]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "product";
+    return new File([blob], `${safe}.${ext}`, { type: blob.type });
+  } catch {
+    return null;
+  }
+}
+
+function isShareAbortError(err: unknown): boolean {
+  if (err instanceof DOMException && err.name === "AbortError") return true;
+  return (
+    err != null &&
+    typeof err === "object" &&
+    "name" in err &&
+    (err as { name: string }).name === "AbortError"
+  );
+}
+
 export default function ProductDetail() {
   const [, params] = useRoute("/product/:id");
   const productId = params?.id || "";
@@ -149,29 +205,41 @@ export default function ProductDetail() {
     const url = `${origin}${path}${qs}`;
     const title = product.name;
     const variantLabel = product.variants?.find(v => v.id === selectedVariant)?.name;
-    const text = variantLabel ? `${product.name} — ${variantLabel}` : product.name;
+    const headline = variantLabel ? `${product.name} — ${variantLabel}` : product.name;
+    const rawDesc = [product.description, currentVariant?.description]
+      .filter(s => typeof s === "string" && s.trim().length > 0)
+      .join("\n\n");
+    const descPlain = plainTextFromHtml(rawDesc, SHARE_DESCRIPTION_MAX_CHARS);
+    const text = descPlain ? `${headline}\n\n${descPlain}` : headline;
 
-    try {
-      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    const absImage = toAbsoluteImageUrl(currentImage, origin);
+    const shareFile = absImage
+      ? await imageFileForShare(absImage, `${product.id}-share`)
+      : null;
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        if (shareFile && navigator.canShare?.({ files: [shareFile] })) {
+          try {
+            await navigator.share({ title, text, url, files: [shareFile] });
+            return;
+          } catch (err) {
+            if (isShareAbortError(err)) return;
+          }
+        }
         await navigator.share({ title, text, url });
         return;
+      } catch (err) {
+        if (isShareAbortError(err)) return;
       }
-    } catch (err) {
-      const aborted =
-        err instanceof DOMException
-          ? err.name === "AbortError"
-          : err != null &&
-            typeof err === "object" &&
-            "name" in err &&
-            (err as { name: string }).name === "AbortError";
-      if (aborted) return;
     }
 
+    const clipboardBody = descPlain ? `${headline}\n\n${descPlain}\n\n${url}` : `${headline}\n\n${url}`;
     try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard");
+      await navigator.clipboard.writeText(clipboardBody);
+      toast.success("Product details copied to clipboard");
     } catch {
-      toast.error("Could not share or copy link");
+      toast.error("Could not share or copy");
     }
   };
 
