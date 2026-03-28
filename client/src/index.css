@@ -162,4 +162,26 @@
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
+
+  /** Home trending strip — slow continuous horizontal drift (duplicate row = 50% loop). */
+  @keyframes trending-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .animate-trending-marquee {
+    animation: trending-marquee 150s linear infinite;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-trending-marquee {
+      animation: none;
+      transform: none;
+    }
+  }
 }

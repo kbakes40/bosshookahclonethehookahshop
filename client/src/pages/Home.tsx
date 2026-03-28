@@ -181,14 +181,19 @@ export default function Home() {
               <h2 className="text-4xl font-display font-black">TRENDING</h2>
             </div>
             
-            <div className="overflow-x-auto pb-4 -mx-4 px-4">
-              <div className="flex gap-6" style={{ width: 'max-content' }}>
+            <div className="relative overflow-hidden pb-4 -mx-4 px-4">
+              <div className="flex w-max gap-6 animate-trending-marquee hover:[animation-play-state:paused]">
                 {trendingProducts.map((product, i) => (
-                  <div key={product.id} className="w-64 flex-shrink-0">
+                  <div key={`${product.id}-a`} className="w-64 shrink-0">
                     <ProductCard
                       product={product}
                       imageFetchPriority={i === 0 ? "high" : undefined}
                     />
+                  </div>
+                ))}
+                {trendingProducts.map(product => (
+                  <div key={`${product.id}-b`} className="w-64 shrink-0">
+                    <ProductCard product={product} />
                   </div>
                 ))}
               </div>
