@@ -5,17 +5,22 @@ import { ShoppingCart, Search, Menu, User, X, ChevronDown, LogOut } from "lucide
 import { Link, useLocation } from "wouter";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import PromoBar from "./PromoBar";
 import { trpc } from "@/lib/trpc";
 import { useSupabaseAuth } from "@/lib/SupabaseAuthProvider";
+import { PredictiveSearchPanel } from "@/components/search/PredictiveSearchPanel";
+import { pushRecentSearch } from "@/lib/storeSearchStorage";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchCategoryFilter, setSearchCategoryFilter] = useState<string | null>(null);
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const { cartCount, openCart } = useCart();
@@ -36,14 +41,38 @@ export default function Header() {
     [navBrands]
   );
 
+  const goFullSearch = (raw: string) => {
+    const q = raw.trim();
+    if (!q) return;
+    pushRecentSearch(q);
+    setLocation(`/search?q=${encodeURIComponent(q)}`);
+    setSearchOpen(false);
+    setDesktopSearchOpen(false);
+    setSearchQuery("");
+    setSearchCategoryFilter(null);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setLocation(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery("");
-    }
+    goFullSearch(searchQuery);
   };
+
+  useEffect(() => {
+    if (!desktopSearchOpen) return;
+    const onDoc = (evt: MouseEvent) => {
+      const el = desktopSearchRef.current;
+      if (el && !el.contains(evt.target as Node)) setDesktopSearchOpen(false);
+    };
+    const onKey = (evt: KeyboardEvent) => {
+      if (evt.key === "Escape") setDesktopSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [desktopSearchOpen]);
 
   // Categories with dropdown menus
   const categoriesWithDropdowns = ['shisha', 'vapes', 'charcoal'];
@@ -115,29 +144,59 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Center: Search */}
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
+            {/* Center: Search + predictive panel */}
+            <div className="hidden md:block flex-1 max-w-md mx-8 relative z-[55]" ref={desktopSearchRef}>
               <form onSubmit={handleSearch} className="relative w-full">
                 <Input
                   type="search"
                   placeholder="Search products..."
                   className="w-full brutalist-border pr-10"
+                  autoComplete="off"
+                  aria-expanded={desktopSearchOpen}
+                  aria-controls="store-predictive-search"
+                  role="combobox"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onFocus={() => setDesktopSearchOpen(true)}
                 />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
+                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Search">
                   <Search className="h-5 w-5 text-muted-foreground" />
                 </button>
               </form>
+              {desktopSearchOpen && (
+                <div
+                  id="store-predictive-search"
+                  className="absolute left-0 right-0 top-full mt-2 z-[100] w-full min-w-[min(100%,24rem)]"
+                >
+                  <PredictiveSearchPanel
+                    variant="desktop"
+                    query={searchQuery}
+                    onQueryChange={setSearchQuery}
+                    categoryFilter={searchCategoryFilter}
+                    onCategoryFilter={setSearchCategoryFilter}
+                    active={desktopSearchOpen}
+                    onViewAll={goFullSearch}
+                    onNavigateProduct={() => {
+                      if (searchQuery.trim()) pushRecentSearch(searchQuery.trim());
+                      setDesktopSearchOpen(false);
+                      setSearchQuery("");
+                      setSearchCategoryFilter(null);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Right: Icons */}
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="md:hidden"
-                onClick={() => setSearchOpen(true)}
+                onClick={() => {
+                  setSearchCategoryFilter(null);
+                  setSearchOpen(true);
+                }}
               >
                 <Search className="h-5 w-5" />
               </Button>
@@ -446,25 +505,52 @@ export default function Header() {
         </div>
       )}
 
-      {/* Mobile Search Overlay */}
+      {/* Mobile Search Overlay — sticky query + predictive body (iOS safe areas) */}
       {searchOpen && (
-        <div className="fixed inset-0 bg-background z-[60] md:hidden">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center gap-4 p-4 border-b-3 border-border">
-              <Button variant="ghost" size="icon" onClick={() => setSearchOpen(false)}>
+        <div className="fixed inset-0 z-[60] md:hidden flex flex-col bg-background">
+          <div className="shrink-0 border-b-3 border-border bg-background">
+            <div className="flex items-center gap-2 px-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0"
+                onClick={() => {
+                  setSearchOpen(false);
+                  setSearchCategoryFilter(null);
+                }}
+                aria-label="Close search"
+              >
                 <X className="h-6 w-6" />
               </Button>
-              <form onSubmit={handleSearch} className="flex-1">
+              <form onSubmit={handleSearch} className="flex-1 min-w-0">
                 <Input
                   type="search"
                   placeholder="Search products..."
                   className="w-full brutalist-border"
+                  autoComplete="off"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   autoFocus
                 />
               </form>
             </div>
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            <PredictiveSearchPanel
+              variant="mobile"
+              query={searchQuery}
+              onQueryChange={setSearchQuery}
+              categoryFilter={searchCategoryFilter}
+              onCategoryFilter={setSearchCategoryFilter}
+              active={searchOpen}
+              onViewAll={goFullSearch}
+              onNavigateProduct={() => {
+                if (searchQuery.trim()) pushRecentSearch(searchQuery.trim());
+                setSearchOpen(false);
+                setSearchQuery("");
+                setSearchCategoryFilter(null);
+              }}
+            />
           </div>
         </div>
       )}

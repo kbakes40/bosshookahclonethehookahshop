@@ -7,12 +7,16 @@ import { router, publicProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 import { mapStoreSettingsRow } from "./_core/supabaseMappers";
-import { getCachedGroupedStorefrontProducts, getCachedHomeHighlights } from "./storeCatalogCache";
+import {
+  getCachedGroupedStorefrontProducts,
+  getCachedHomeHighlights,
+} from "./storeCatalogCache";
 import { getStorefrontProductById } from "./storeCatalog";
 import {
   categoryMatches,
   filterProductsForGrid,
-  searchProductsByQuery,
+  matchCategoryNavHits,
+  rankProductsBySearch,
   sortStorefrontProducts,
 } from "./storeCatalogQuery";
 
@@ -129,6 +133,7 @@ export const storeRouter = router({
     .input(
       z.object({
         q: z.string(),
+        category: z.string().optional(),
         limit: z.number().min(1).max(48).default(24),
         cursor: z.number().min(0).optional(),
       })
@@ -136,13 +141,119 @@ export const storeRouter = router({
     .query(async ({ input }) => {
       const offset = input.cursor ?? 0;
       const all = await getCachedGroupedStorefrontProducts();
-      const found = searchProductsByQuery(all, input.q);
-      const sorted = sortStorefrontProducts(found, "best-selling");
+      const pool =
+        input.category?.trim() && input.category.trim().toLowerCase() !== "all"
+          ? all.filter(p => categoryMatches(p.category, input.category!.trim()))
+          : all;
+      const ranked = rankProductsBySearch(pool, input.q);
+      const sorted = ranked.map(r => r.product);
       const total = sorted.length;
       const products = sorted.slice(offset, offset + input.limit);
       const nextCursor =
         offset + input.limit < total ? offset + input.limit : null;
       return { products, total, nextCursor };
+    }),
+
+  /**
+   * Predictive search: idle snapshot (popular + trends) or ranked preview + facet hints.
+   * Uses the same cached catalog as the rest of the storefront (production-safe).
+   */
+  searchPreview: publicProcedure
+    .input(
+      z.object({
+        q: z.string().max(120).optional(),
+        category: z.string().optional(),
+        previewLimit: z.number().min(4).max(24).default(10),
+      })
+    )
+    .query(async ({ input }) => {
+      const all = await getCachedGroupedStorefrontProducts();
+      const highlights = await getCachedHomeHighlights();
+      const q = (input.q ?? "").trim();
+      const cat =
+        input.category?.trim() && input.category.trim().toLowerCase() !== "all"
+          ? input.category.trim()
+          : "";
+      const pool = cat ? all.filter(p => categoryMatches(p.category, cat)) : all;
+
+      const trendingSearches = [
+        "Al Fakher",
+        "Starbuzz",
+        "disposable vape",
+        "coconut charcoal",
+        "Starbuzz Mini",
+        "Mazaya",
+        "MOB hookah",
+        "quick light coals",
+      ];
+
+      const topCategories = [
+        { id: "vapes", label: "Vapes", href: "/vapes" },
+        { id: "hookahs", label: "Hookahs", href: "/hookahs" },
+        { id: "shisha", label: "Shisha", href: "/shisha" },
+        { id: "charcoal", label: "Charcoal", href: "/charcoal" },
+        { id: "accessories", label: "Accessories", href: "/accessories" },
+        { id: "bowls", label: "Hookah Bowls", href: "/bowls" },
+      ];
+
+      if (!q) {
+        const seen = new Set<string>();
+        const mergeFeatured: typeof all = [];
+        for (const p of [...highlights.featured, ...highlights.trending]) {
+          if (seen.has(p.id)) continue;
+          seen.add(p.id);
+          mergeFeatured.push(p);
+        }
+        const popularProducts =
+          mergeFeatured.length >= 6
+            ? mergeFeatured.slice(0, input.previewLimit)
+            : sortStorefrontProducts(all, "best-selling").slice(0, input.previewLimit);
+
+        return {
+          mode: "idle" as const,
+          popularProducts,
+          trendingSearches,
+          topCategories,
+          totalMatching: 0,
+        };
+      }
+
+      const ranked = rankProductsBySearch(pool, q);
+      const totalMatching = ranked.length;
+      const slice = ranked.slice(0, input.previewLimit).map(r => ({
+        product: r.product,
+        score: r.score,
+      }));
+
+      const categoryNav = matchCategoryNavHits(q, 4);
+      const brandCounts = new Map<string, number>();
+      for (const { product } of ranked.slice(0, 48)) {
+        const b = product.brand?.trim();
+        if (b) brandCounts.set(b, (brandCounts.get(b) ?? 0) + 1);
+      }
+      const brandHints = Array.from(brandCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([brand, count]) => ({ brand, count }));
+
+      const nq = q.toLowerCase();
+      const suggestions = trendingSearches
+        .filter(
+          t =>
+            t.toLowerCase().includes(nq) ||
+            nq.split(/\s+/).some(w => w.length > 1 && t.toLowerCase().includes(w))
+        )
+        .slice(0, 6);
+
+      return {
+        mode: "results" as const,
+        products: slice,
+        totalMatching,
+        categoryNav,
+        brandHints,
+        suggestions: suggestions.length ? suggestions : trendingSearches.slice(0, 4),
+        topCategories,
+      };
     }),
 
   listRelatedProducts: publicProcedure

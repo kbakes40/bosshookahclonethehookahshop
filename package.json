@@ -26,7 +26,9 @@
     "admin:ensure-user": "node scripts/ensure-admin-auth-user.js",
     "test:lookup-api": "node scripts/test-api-route.js",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "favicon:ico": "node scripts/generate-favicon-ico.mjs"
+    "favicon:ico": "node scripts/generate-favicon-ico.mjs",
+    "import:ths-shop": "tsx scripts/import-ths-shop-catalog.ts",
+    "import:ths-shop:apply": "tsx scripts/import-ths-shop-catalog.ts --apply"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

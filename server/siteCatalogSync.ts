@@ -43,6 +43,10 @@ export type BhProductInsert = {
   weight_lb: number | null;
   created_at: string;
   updated_at: string;
+  /** Set by external importers (e.g. THS WooCommerce permalink) for dedup and enrichment */
+  source_product_url?: string | null;
+  /** JSON blob for importer-only fields (gallery, raw attributes, wp ids) */
+  import_meta?: Record<string, unknown> | null;
 };
 
 /** One row per sellable SKU (products with variants are flattened). */

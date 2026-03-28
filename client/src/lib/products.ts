@@ -34,6 +34,8 @@ export interface Product {
   weightLb?: number;
   /** Latest row `created_at` among merged SKUs; used for "newest" sort only. */
   createdAt?: string;
+  /** DB/catalog SKU strings merged for search (e.g. catalog:50, THS-…). Optional on static catalog. */
+  catalogSkus?: string[];
 }
 
 export const categories = [

@@ -98,6 +98,10 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
   const wLb = weightLbFromRows(rows);
   const createdAt = latestCreatedIso(rows);
 
+  const catalogSkus = rows
+    .map(r => String(r.sku ?? "").trim())
+    .filter(s => s.length > 0);
+
   return applyCatalogStorefrontOverride(
     {
       id: key,
@@ -117,6 +121,7 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
       variants: variants.length > 0 ? variants : undefined,
       ...(wLb != null ? { weightLb: wLb } : {}),
       ...(createdAt ? { createdAt } : {}),
+      ...(catalogSkus.length ? { catalogSkus } : {}),
     },
     key
   );
@@ -126,6 +131,7 @@ export function mapNonCatalogRow(row: BhProductRow): Product {
   const w =
     row.weight_lb != null && Number(row.weight_lb) > 0 ? Number(row.weight_lb) : undefined;
   const createdAt = row.created_at ? String(row.created_at) : undefined;
+  const sku = String(row.sku ?? "").trim();
   return {
     id: String(row.id ?? ""),
     name: String(row.name ?? ""),
@@ -141,6 +147,7 @@ export function mapNonCatalogRow(row: BhProductRow): Product {
     description: row.description ? String(row.description) : undefined,
     ...(w != null ? { weightLb: w } : {}),
     ...(createdAt ? { createdAt } : {}),
+    ...(sku ? { catalogSkus: [sku] } : {}),
   };
 }
 
