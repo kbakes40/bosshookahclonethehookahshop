@@ -10,16 +10,20 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-/** Bundled catalog first; append Supabase-highlight rows not already present (by id). Avoids empty sections when DB returns [] and keeps shisha/hookah heroes when charcoal/vapes are flagged in DB. */
-function mergeStaticWithDbHighlights(
+/**
+ * Curated DB highlights first; then bundled static items not already in that list.
+ * When the API returns no rows, falls back to static only.
+ */
+function mergeDbHighlightsWithStaticFallback(
   staticList: Product[],
   dbList: Product[] | undefined,
   max: number
 ): Product[] {
   const db = dbList ?? [];
-  const staticIds = new Set(staticList.map(p => p.id));
-  const extras = db.filter(p => !staticIds.has(p.id));
-  return [...staticList, ...extras].slice(0, max);
+  if (db.length === 0) return staticList.slice(0, max);
+  const dbIds = new Set(db.map(p => p.id));
+  const staticExtras = staticList.filter(p => !dbIds.has(p.id));
+  return [...db, ...staticExtras].slice(0, max);
 }
 
 export default function Home() {
@@ -38,12 +42,12 @@ export default function Home() {
   });
 
   const trendingProducts = useMemo(
-    () => mergeStaticWithDbHighlights(staticHighlights.trending, highlights.data?.trending, 24),
+    () => mergeDbHighlightsWithStaticFallback(staticHighlights.trending, highlights.data?.trending, 24),
     [staticHighlights.trending, highlights.data?.trending]
   );
 
   const featuredProducts = useMemo(
-    () => mergeStaticWithDbHighlights(staticHighlights.featured, highlights.data?.featured, 24),
+    () => mergeDbHighlightsWithStaticFallback(staticHighlights.featured, highlights.data?.featured, 24),
     [staticHighlights.featured, highlights.data?.featured]
   );
 
