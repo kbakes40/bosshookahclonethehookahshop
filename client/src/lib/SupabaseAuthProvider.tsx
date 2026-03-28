@@ -1,3 +1,4 @@
+import { getAuthCallbackUrl } from "@/lib/authRedirect";
 import { supabase } from "@/lib/supabase";
 import { trpc } from "@/lib/trpc";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
@@ -68,7 +69,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getAuthCallbackUrl(),
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -94,7 +95,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: getAuthCallbackUrl(),
       },
     });
     if (error) return { error: error.message };
@@ -105,7 +106,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: getAuthCallbackUrl(),
         shouldCreateUser: true,
       },
     });

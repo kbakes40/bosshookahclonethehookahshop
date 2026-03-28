@@ -25,8 +25,7 @@ export default function CartDrawer() {
   const [, setLocation] = useLocation();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("shipping");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "zelle" | "bitcoin" | "paypal">("paypal");
-  const [cardPaypalInfoOpen, setCardPaypalInfoOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "zelle" | "bitcoin" | "paypal">("card");
   const [bitcoinInfoOpen, setBitcoinInfoOpen] = useState(false);
   const [shippingZip, setShippingZip] = useState("");
   const createCheckoutSession = trpc.checkout.createSession.useMutation();
@@ -265,8 +264,12 @@ export default function CartDrawer() {
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => setCardPaypalInfoOpen(true)}
-              className="p-4 brutalist-border flex flex-col items-center gap-2 transition-colors bg-background hover:bg-secondary"
+              onClick={() => setPaymentMethod("card")}
+              className={`p-4 brutalist-border flex flex-col items-center gap-2 transition-colors ${
+                paymentMethod === "card"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background hover:bg-secondary"
+              }`}
             >
               <span className="text-sm font-bold">CREDIT CARD</span>
             </button>
@@ -386,8 +389,7 @@ export default function CartDrawer() {
                 closeCart();
                 window.location.assign(data.approveUrl);
                 return;
-              } else {
-                // Stripe checkout
+              } else if (paymentMethod === "card") {
                 const checkoutItems = items.map(item => {
                   const itemName = item.selectedVariantName
                     ? `${item.brand} - ${item.name} - ${item.selectedVariantName}`
@@ -401,16 +403,18 @@ export default function CartDrawer() {
                   };
                 });
 
-                const session = await createCheckoutSession.mutateAsync({
+                const stripeSession = await createCheckoutSession.mutateAsync({
                   items: checkoutItems,
                   deliveryMethod,
                   shippingCents: Math.round(shippingQuote.shippingAmount * 100),
                 });
 
-                if (session.url) {
-                  toast.success("Redirecting to checkout...");
-                  window.open(session.url, "_blank");
+                if (stripeSession.url) {
+                  toast.success("Redirecting to checkout…");
                   closeCart();
+                  window.location.assign(stripeSession.url);
+                } else {
+                  toast.error("Checkout did not return a payment URL");
                 }
               }
             } catch (error: unknown) {
@@ -553,59 +557,6 @@ export default function CartDrawer() {
         </div>
       )}
 
-      {cardPaypalInfoOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setCardPaypalInfoOpen(false)}
-          role="presentation"
-        >
-          <div
-            className="w-full max-w-lg bg-background border-3 border-border brutalist-border brutalist-shadow p-8"
-            onClick={e => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="cart-card-paypal-title"
-          >
-            <h3
-              id="cart-card-paypal-title"
-              className="font-display font-black text-xl md:text-2xl text-center mb-6 tracking-tight"
-            >
-              PAY WITH DEBIT OR CREDIT CARD
-            </h3>
-            <div className="space-y-4 mb-8 text-sm leading-relaxed text-center text-foreground">
-              <p>
-                We take card payments through <span className="font-bold">PayPal</span>. You do not need a PayPal
-                balance. At checkout you can choose{" "}
-                <span className="font-bold">Debit or Credit Card</span> on PayPal&apos;s secure page.
-              </p>
-              <p>
-                Select <span className="font-bold">PAYPAL</span> in the payment options below, then tap{" "}
-                <span className="font-bold">CHECKOUT</span> to continue.
-              </p>
-            </div>
-            <div className="space-y-3">
-              <Button
-                type="button"
-                className="w-full h-14 brutalist-border brutalist-shadow bg-primary text-primary-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-150 text-lg font-black"
-                onClick={() => {
-                  setPaymentMethod("paypal");
-                  setCardPaypalInfoOpen(false);
-                }}
-              >
-                SELECT PAYPAL
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 brutalist-border bg-background font-bold"
-                onClick={() => setCardPaypalInfoOpen(false)}
-              >
-                GOT IT
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
