@@ -100,11 +100,11 @@ export default function CartDrawer() {
             className="flex gap-4 pb-6 border-b-3 border-border last:border-0"
           >
             <Link href={`/product/${item.id}`} onClick={closeCart}>
-              <div className="w-24 h-24 bg-secondary brutalist-border flex-shrink-0">
+              <div className="w-24 h-24 bg-secondary brutalist-border flex-shrink-0 flex items-center justify-center overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-cover"
+                  className="max-h-full max-w-full w-full h-full object-contain object-center"
                 />
               </div>
             </Link>

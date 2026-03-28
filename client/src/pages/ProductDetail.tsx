@@ -153,11 +153,11 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             {/* Image Gallery */}
             <div>
-              <div className="bg-secondary brutalist-border aspect-square mb-4 overflow-hidden">
+              <div className="bg-secondary brutalist-border aspect-square mb-4 overflow-hidden flex items-center justify-center">
                 <img 
                   src={currentImage} 
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="max-h-full max-w-full w-full h-full object-contain object-center"
                 />
               </div>
               <div className="grid grid-cols-4 gap-4">
@@ -165,11 +165,11 @@ export default function ProductDetail() {
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`aspect-square brutalist-border overflow-hidden ${
+                    className={`aspect-square brutalist-border overflow-hidden flex items-center justify-center ${
                       selectedImage === idx ? 'border-primary' : ''
                     }`}
                   >
-                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`View ${idx + 1}`} className="max-h-full max-w-full w-full h-full object-contain object-center" />
                   </button>
                 ))}
               </div>

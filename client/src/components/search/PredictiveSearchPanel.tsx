@@ -217,13 +217,15 @@ export function PredictiveSearchPanel({
                     onMouseDown={recordAndNavigate}
                     className="flex items-center gap-3 p-2 rounded-md hover:bg-secondary border border-transparent hover:border-border transition-colors"
                   >
-                    <img
-                      src={cardImageSrc(p.image)}
-                      alt=""
-                      className="w-12 h-12 object-cover brutalist-border shrink-0"
-                      width={48}
-                      height={48}
-                    />
+                    <div className="w-12 h-12 bg-secondary brutalist-border shrink-0 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={cardImageSrc(p.image)}
+                        alt=""
+                        className="max-h-full max-w-full w-full h-full object-contain object-center"
+                        width={48}
+                        height={48}
+                      />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-bold truncate">
                         {p.brand}
@@ -333,13 +335,15 @@ export function PredictiveSearchPanel({
                       onMouseDown={recordAndNavigate}
                       className="flex items-center gap-3 p-2.5 min-h-[4.5rem] rounded-md hover:bg-secondary border border-transparent hover:border-border active:bg-secondary/80 transition-colors"
                     >
-                      <img
-                        src={cardImageSrc(p.image)}
-                        alt=""
-                        className="w-14 h-14 object-cover brutalist-border shrink-0"
-                        width={56}
-                        height={56}
-                      />
+                      <div className="w-14 h-14 bg-secondary brutalist-border shrink-0 flex items-center justify-center overflow-hidden">
+                        <img
+                          src={cardImageSrc(p.image)}
+                          alt=""
+                          className="max-h-full max-w-full w-full h-full object-contain object-center"
+                          width={56}
+                          height={56}
+                        />
+                      </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-bold truncate">
                           {p.brand} · {categoryDisplayName(p.category)}

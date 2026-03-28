@@ -22,7 +22,7 @@ function ProductCardInner({ product, imageFetchPriority }: ProductCardProps) {
     <div className="group relative">
       <Link href={`/product/${product.id}`} className="block">
         {/* Product Image Container */}
-        <div className="relative bg-secondary brutalist-border overflow-hidden aspect-square mb-4">
+        <div className="relative bg-secondary brutalist-border overflow-hidden aspect-square mb-4 flex items-center justify-center">
           <img
             src={src}
             alt={product.name}
@@ -32,7 +32,7 @@ function ProductCardInner({ product, imageFetchPriority }: ProductCardProps) {
             loading={eager ? "eager" : "lazy"}
             decoding="async"
             {...(eager ? { fetchPriority: "high" as const } : {})}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="max-h-full max-w-full w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
           />
 
           {/* Out of Stock Overlay */}
