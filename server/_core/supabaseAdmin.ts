@@ -1,21 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
-import { DEFAULT_SUPABASE_URL } from "@shared/const";
+import {
+  isSupabaseServiceRoleConfigured,
+  resolveSupabaseServiceRoleKey,
+  resolveSupabaseUrl,
+} from "./supabaseEnv";
 
-const supabaseUrl =
-  process.env.VITE_SUPABASE_URL?.trim() || DEFAULT_SUPABASE_URL;
+const supabaseUrl = resolveSupabaseUrl();
 const supabaseServiceRoleKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+  resolveSupabaseServiceRoleKey() ||
   (process.env.NODE_ENV === "development"
     ? "__local_dev_missing_set_SUPABASE_SERVICE_ROLE_KEY__"
     : "");
 
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+if (!isSupabaseServiceRoleConfigured()) {
   console.warn(
-    "[Supabase Admin] SUPABASE_SERVICE_ROLE_KEY is not set — using a dev placeholder so the server can start; API calls that need the service role will fail until you add it to .env"
+    "[Supabase Admin] SUPABASE_SERVICE_ROLE_KEY is not set — using a dev placeholder in development only; production API calls to Postgres will fail until you add it (e.g. Vercel → Environment Variables)."
   );
 }
 if (!supabaseUrl) {
-  console.warn("[Supabase Admin] Missing Supabase URL (VITE_SUPABASE_URL or default)");
+  console.warn("[Supabase Admin] Missing Supabase URL");
 }
 
 /**

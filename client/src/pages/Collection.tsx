@@ -21,6 +21,9 @@ const TOP_LEVEL_CATEGORY = new Set([
   "wholesale",
 ]);
 
+/** Must match server `listProductsPage` default so we do not cap the grid at $999 client-side. */
+const DEFAULT_PRICE_MAX = 999_999;
+
 /** Derive storefront category from pathname (supports /vapes, /collections/vapes, querystrings). */
 function categoryFromPath(location: string): string {
   const pathOnly = (location.split("?")[0] ?? "").split("#")[0] ?? "";
@@ -35,16 +38,10 @@ function categoryFromPath(location: string): string {
 
 export default function Collection() {
   const [location] = useLocation();
-  /** Prefer real pathname so category tracks SPA navigation even if hook state lags. */
-  const category = useMemo(() => {
-    if (typeof window !== "undefined") {
-      return categoryFromPath(window.location.pathname);
-    }
-    return categoryFromPath(location);
-  }, [location]);
+  const category = useMemo(() => categoryFromPath(location), [location]);
 
   const [priceMin, setPriceMin] = useState("0");
-  const [priceMax, setPriceMax] = useState("999");
+  const [priceMax, setPriceMax] = useState(String(DEFAULT_PRICE_MAX));
   const [sortBy, setSortBy] = useState<
     "best-selling" | "price-low" | "price-high" | "newest"
   >("best-selling");
@@ -53,7 +50,7 @@ export default function Collection() {
   const [visibleLimit, setVisibleLimit] = useState(24);
 
   const priceMinN = parseFloat(priceMin) || 0;
-  const priceMaxN = parseFloat(priceMax) || 999;
+  const priceMaxN = parseFloat(priceMax) || DEFAULT_PRICE_MAX;
 
   useEffect(() => {
     setVisibleLimit(24);
@@ -168,7 +165,7 @@ export default function Collection() {
                       type="button"
                       onClick={() => {
                         setPriceMin("0");
-                        setPriceMax("999");
+                        setPriceMax(String(DEFAULT_PRICE_MAX));
                       }}
                       className="text-xs text-primary hover:underline"
                     >
@@ -186,7 +183,7 @@ export default function Collection() {
                     <span className="text-sm">to</span>
                     <input
                       type="number"
-                      placeholder="999"
+                      placeholder={`${DEFAULT_PRICE_MAX}`}
                       value={priceMax}
                       onChange={e => setPriceMax(e.target.value)}
                       className="w-full brutalist-border px-2 py-1 text-sm"
@@ -220,6 +217,11 @@ export default function Collection() {
                   >
                     Retry
                   </button>
+                  {catalogQuery.error?.message ? (
+                    <span className="block mt-2 text-xs font-normal text-muted-foreground max-w-xl">
+                      {catalogQuery.error.message}
+                    </span>
+                  ) : null}
                 </p>
               )}
 

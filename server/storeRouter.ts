@@ -78,36 +78,51 @@ export const storeRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const offset = input.cursor ?? 0;
-      const all = await getCachedGroupedStorefrontProducts();
-      const base =
-        input.category === "all" || input.category.trim() === ""
-          ? all
-          : all.filter(p => categoryMatches(p.category, input.category));
-      const inStockCount = base.filter(p => p.inStock).length;
-      const outOfStockCount = base.filter(p => !p.inStock).length;
+      try {
+        const offset = input.cursor ?? 0;
+        const all = await getCachedGroupedStorefrontProducts();
+        const base =
+          input.category === "all" || input.category.trim() === ""
+            ? all
+            : all.filter(p => categoryMatches(p.category, input.category));
+        const inStockCount = base.filter(p => p.inStock).length;
+        const outOfStockCount = base.filter(p => !p.inStock).length;
 
-      let filtered = filterProductsForGrid(all, {
-        category: input.category,
-        brand: input.brand,
-        priceMin: input.priceMin,
-        priceMax: input.priceMax,
-        showInStock: input.showInStock,
-        showOutOfStock: input.showOutOfStock,
-      });
-      filtered = sortStorefrontProducts(filtered, input.sortBy);
-      const total = filtered.length;
-      const products = filtered.slice(offset, offset + input.limit);
-      const nextCursor =
-        offset + input.limit < total ? offset + input.limit : null;
+        let filtered = filterProductsForGrid(all, {
+          category: input.category,
+          brand: input.brand,
+          priceMin: input.priceMin,
+          priceMax: input.priceMax,
+          showInStock: input.showInStock,
+          showOutOfStock: input.showOutOfStock,
+        });
+        filtered = sortStorefrontProducts(filtered, input.sortBy);
+        const total = filtered.length;
+        const products = filtered.slice(offset, offset + input.limit);
+        const nextCursor =
+          offset + input.limit < total ? offset + input.limit : null;
 
-      return {
-        products,
-        total,
-        inStockCount,
-        outOfStockCount,
-        nextCursor,
-      };
+        return {
+          products,
+          total,
+          inStockCount,
+          outOfStockCount,
+          nextCursor,
+        };
+      } catch (cause) {
+        const message =
+          cause instanceof Error
+            ? cause.message
+            : typeof cause === "string"
+              ? cause
+              : "Failed to load products";
+        console.error("[store.listProductsPage]", cause);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message,
+          cause: cause instanceof Error ? cause : undefined,
+        });
+      }
     }),
 
   searchProducts: publicProcedure

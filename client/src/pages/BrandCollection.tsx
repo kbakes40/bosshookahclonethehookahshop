@@ -76,6 +76,11 @@ export default function BrandCollection() {
           {catalogQuery.isError && (
             <p className="text-sm text-destructive mb-4">
               Could not load products. Please refresh the page.
+              {catalogQuery.error?.message ? (
+                <span className="block mt-2 text-xs font-normal text-muted-foreground max-w-xl">
+                  {catalogQuery.error.message}
+                </span>
+              ) : null}
             </p>
           )}
 

@@ -2,6 +2,7 @@
  * Maps Supabase `bh_products` rows → storefront `Product` shape (incl. catalog SKU grouping).
  */
 import type { Product, ProductVariant } from "../client/src/lib/products";
+import { assertSupabaseServiceRoleForProduction } from "./_core/supabaseEnv";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 import { BH_PRODUCT_STOREFRONT_LIST_COLUMNS } from "./storeCatalogColumns";
 
@@ -164,6 +165,7 @@ export function groupBhProductRowsToStorefrontProducts(rows: BhProductRow[]): Pr
 
 /** Slim row fetch for storefront list + grouping (smaller payload than `select *`). */
 export async function fetchStorefrontListRows(): Promise<BhProductRow[]> {
+  assertSupabaseServiceRoleForProduction();
   const { data, error } = await supabaseAdmin
     .from("bh_products")
     .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)
@@ -185,6 +187,7 @@ export async function fetchAndGroupHomeHighlightProducts(): Promise<{
   trending: Product[];
   featured: Product[];
 }> {
+  assertSupabaseServiceRoleForProduction();
   const { data: flagged, error } = await supabaseAdmin
     .from("bh_products")
     .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)

@@ -2,11 +2,28 @@ import type { Product } from "../client/src/lib/products";
 
 export type StorefrontSort = "best-selling" | "price-low" | "price-high" | "newest";
 
-/** Case-insensitive match so URL `/vapes` works even if a row has `Vapes`. */
+/** Normalize plural/singular or legacy slugs so filters match live DB category strings. */
+const CATEGORY_SYNONYM_GROUPS: string[][] = [
+  ["vapes", "vape"],
+  ["bowls", "bowl"],
+  ["hookahs", "hookah"],
+];
+
+function categorySynonymSet(filterLower: string): Set<string> | null {
+  for (const g of CATEGORY_SYNONYM_GROUPS) {
+    if (g.includes(filterLower)) return new Set(g);
+  }
+  return null;
+}
+
+/** Case-insensitive match so URL `/vapes` works even if a row has `Vapes` or `vape`. */
 export function categoryMatches(productCategory: string, filterCategory: string): boolean {
   const f = filterCategory.trim().toLowerCase();
   if (f === "" || f === "all") return true;
-  return productCategory.trim().toLowerCase() === f;
+  const p = productCategory.trim().toLowerCase();
+  const syn = categorySynonymSet(f);
+  if (syn) return syn.has(p);
+  return p === f;
 }
 
 export function filterProductsForGrid(
