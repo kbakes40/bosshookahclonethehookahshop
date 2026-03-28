@@ -119,18 +119,22 @@ export default function Home() {
             </Link>
           ))}
 
-          {/* Slider Controls */}
+          {/* Slider Controls — mobile: hug outer edges + slightly smaller controls; md+: same offset/size as before */}
           <button
+            type="button"
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white brutalist-border flex items-center justify-center hover:bg-primary hover:text-white transition-colors duration-150 z-20"
+            aria-label="Previous slide"
+            className="absolute z-20 top-1/2 -translate-y-1/2 flex size-11 min-h-11 min-w-11 items-center justify-center bg-white brutalist-border transition-colors duration-150 hover:bg-primary hover:text-white max-md:left-[max(0.25rem,env(safe-area-inset-left,0px))] md:left-4 md:size-12 md:min-h-12 md:min-w-12"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5 shrink-0 md:h-6 md:w-6" />
           </button>
           <button
+            type="button"
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white brutalist-border flex items-center justify-center hover:bg-primary hover:text-white transition-colors duration-150 z-20"
+            aria-label="Next slide"
+            className="absolute z-20 top-1/2 -translate-y-1/2 flex size-11 min-h-11 min-w-11 items-center justify-center bg-white brutalist-border transition-colors duration-150 hover:bg-primary hover:text-white max-md:right-[max(0.25rem,env(safe-area-inset-right,0px))] md:right-4 md:size-12 md:min-h-12 md:min-w-12"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5 shrink-0 md:h-6 md:w-6" />
           </button>
 
           {/* Slide Indicators */}
