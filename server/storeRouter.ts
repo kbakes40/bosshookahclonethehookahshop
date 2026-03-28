@@ -10,6 +10,7 @@ import { mapStoreSettingsRow } from "./_core/supabaseMappers";
 import { getCachedGroupedStorefrontProducts, getCachedHomeHighlights } from "./storeCatalogCache";
 import { getStorefrontProductById } from "./storeCatalog";
 import {
+  categoryMatches,
   filterProductsForGrid,
   searchProductsByQuery,
   sortStorefrontProducts,
@@ -80,7 +81,9 @@ export const storeRouter = router({
       const offset = input.cursor ?? 0;
       const all = await getCachedGroupedStorefrontProducts();
       const base =
-        input.category === "all" ? all : all.filter(p => p.category === input.category);
+        input.category === "all" || input.category.trim() === ""
+          ? all
+          : all.filter(p => categoryMatches(p.category, input.category));
       const inStockCount = base.filter(p => p.inStock).length;
       const outOfStockCount = base.filter(p => !p.inStock).length;
 
@@ -138,7 +141,7 @@ export const storeRouter = router({
     .query(async ({ input }) => {
       const all = await getCachedGroupedStorefrontProducts();
       const filtered = all.filter(
-        p => p.category === input.category && p.id !== input.excludeId
+        p => categoryMatches(p.category, input.category) && p.id !== input.excludeId
       );
       const sorted = sortStorefrontProducts(filtered, "best-selling");
       return sorted.slice(0, input.limit);

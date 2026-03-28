@@ -1,11 +1,12 @@
 // Brand Collection Page - Shows products filtered by category and brand
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export default function BrandCollection() {
   const [location] = useLocation();
@@ -19,7 +20,13 @@ export default function BrandCollection() {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-  const catalogPage = trpc.store.listProductsPage.useInfiniteQuery(
+  const [visibleLimit, setVisibleLimit] = useState(24);
+
+  useEffect(() => {
+    setVisibleLimit(24);
+  }, [category, brandName]);
+
+  const catalogQuery = trpc.store.listProductsPage.useQuery(
     {
       category: category || "all",
       brand: brandName,
@@ -28,20 +35,18 @@ export default function BrandCollection() {
       showInStock: false,
       showOutOfStock: false,
       sortBy: "best-selling",
-      limit: 24,
+      limit: visibleLimit,
+      cursor: 0,
     },
     {
-      initialPageParam: 0,
-      getNextPageParam: last => last.nextCursor ?? undefined,
       enabled: Boolean(category && brandName),
       staleTime: 60_000,
+      placeholderData: keepPreviousData,
     }
   );
 
-  const products = useMemo(
-    () => catalogPage.data?.pages.flatMap(p => p.products) ?? [],
-    [catalogPage.data?.pages]
-  );
+  const products = catalogQuery.data?.products ?? [];
+  const hasNextPage = catalogQuery.data?.nextCursor != null;
 
   const categoryTitles: Record<string, string> = {
     shisha: "Shisha",
@@ -60,12 +65,18 @@ export default function BrandCollection() {
         <div className="container">
           <div className="mb-12">
             <h1 className="text-5xl font-display font-black mb-4">
-              {brandName} {categoryTitles[category]}
+              {brandName} {categoryTitles[category] ?? category}
             </h1>
             <p className="text-lg text-muted-foreground">
               Browse our selection of {brandName} products
             </p>
           </div>
+
+          {catalogQuery.isError && (
+            <p className="text-sm text-destructive mb-4">
+              Could not load products. Please refresh the page.
+            </p>
+          )}
 
           {products.length > 0 ? (
             <>
@@ -74,21 +85,21 @@ export default function BrandCollection() {
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-              {catalogPage.hasNextPage && (
+              {hasNextPage && (
                 <div className="flex justify-center mt-10">
                   <Button
                     type="button"
                     variant="outline"
                     className="brutalist-border font-bold"
-                    onClick={() => catalogPage.fetchNextPage()}
-                    disabled={catalogPage.isFetchingNextPage}
+                    onClick={() => setVisibleLimit(l => l + 24)}
+                    disabled={catalogQuery.isFetching}
                   >
-                    {catalogPage.isFetchingNextPage ? "Loading…" : "Load more"}
+                    {catalogQuery.isFetching ? "Loading…" : "Load more"}
                   </Button>
                 </div>
               )}
             </>
-          ) : catalogPage.isPending ? (
+          ) : catalogQuery.isPending && !catalogQuery.error ? (
             <p className="text-muted-foreground">Loading products…</p>
           ) : (
             <div className="text-center py-16">

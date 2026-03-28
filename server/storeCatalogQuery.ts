@@ -2,6 +2,13 @@ import type { Product } from "../client/src/lib/products";
 
 export type StorefrontSort = "best-selling" | "price-low" | "price-high" | "newest";
 
+/** Case-insensitive match so URL `/vapes` works even if a row has `Vapes`. */
+export function categoryMatches(productCategory: string, filterCategory: string): boolean {
+  const f = filterCategory.trim().toLowerCase();
+  if (f === "" || f === "all") return true;
+  return productCategory.trim().toLowerCase() === f;
+}
+
 export function filterProductsForGrid(
   products: Product[],
   opts: {
@@ -14,7 +21,9 @@ export function filterProductsForGrid(
   }
 ): Product[] {
   let list =
-    opts.category === "all" ? [...products] : products.filter(p => p.category === opts.category);
+    opts.category === "all" || opts.category.trim() === ""
+      ? [...products]
+      : products.filter(p => categoryMatches(p.category, opts.category));
 
   if (opts.brand?.trim()) {
     const b = opts.brand.trim().toLowerCase();
