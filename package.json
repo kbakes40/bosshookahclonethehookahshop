@@ -23,6 +23,7 @@
     "test:lookup-serpapi": "node scripts/test-serpapi.js",
     "test:lookup-supabase": "node scripts/test-supabase.js",
     "verify:supabase": "node scripts/verify-supabase-match.js",
+    "admin:ensure-user": "node scripts/ensure-admin-auth-user.js",
     "test:lookup-api": "node scripts/test-api-route.js",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },

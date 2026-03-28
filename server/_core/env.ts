@@ -12,7 +12,11 @@ export const ENV = {
   supabaseServiceRoleKey: resolveSupabaseServiceRoleKey(),
   // Admin emails - these users will always have admin role
   adminEmail: "kevin@bakerhub.com",
-  adminEmails: ["kevin@bakerhub.com", "chillvibesss420@gmail.com"],
+  adminEmails: [
+    "kevin@bakerhub.com",
+    "chillvibesss420@gmail.com",
+    "admin@thehookahshop.com",
+  ],
   /**
    * PayPal REST (server). On Vercel, set `PUBLIC_SITE_URL` (or `VITE_SITE_ORIGIN`) to the canonical https storefront so PayPal return URLs match the tab where checkout started.
    */

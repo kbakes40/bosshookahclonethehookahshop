@@ -89,7 +89,7 @@ export default function AdminLogin() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              placeholder="admin@bosshookah.site"
+              placeholder="admin@thehookahshop.com"
               className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#60A5FA] transition-colors"
             />
           </div>
@@ -110,7 +110,7 @@ export default function AdminLogin() {
           {hasSession && profileLoadError && (
             <p className="text-xs text-amber-300 bg-amber-900/30 rounded-lg px-3 py-2">
               Could not load your admin profile from the API (check you are on{" "}
-              <strong className="text-white">www.bosshookah.site</strong> and that Vercel has{" "}
+              your live storefront URL and that Vercel has{" "}
               <code className="text-zinc-200">SUPABASE_SERVICE_ROLE_KEY</code>).{" "}
               {profileLoadError.message}
             </p>
