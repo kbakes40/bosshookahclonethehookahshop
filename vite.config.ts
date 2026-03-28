@@ -6,6 +6,7 @@ import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 import { injectGaMeasurementId } from "./vite.inject-ga-plugin";
+import { injectSiteMeta } from "./vite.inject-site-meta";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -157,6 +158,7 @@ const plugins = [
   jsxLocPlugin(),
   vitePluginManusRuntime(),
   vitePluginManusDebugCollector(),
+  injectSiteMeta(),
   injectGaMeasurementId(),
 ];
 

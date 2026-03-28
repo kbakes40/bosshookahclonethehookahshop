@@ -97,7 +97,7 @@ export default function Footer() {
           </button>
           {socialOpen && (
             <div className="pb-6 flex gap-4 flex-wrap">
-              <a href="https://www.instagram.com/bosshookahshop/" target="_blank" rel="noopener noreferrer" 
+              <a href="https://www.instagram.com/thehookahshop1?igsh=MWwyZTViNWEwbnV0cw==" target="_blank" rel="noopener noreferrer" 
                  className="w-12 h-12 bg-foreground text-background flex items-center justify-center brutalist-border hover:bg-primary hover:border-primary transition-colors duration-150"
                  title="Instagram">
                 <Instagram className="h-5 w-5" />
