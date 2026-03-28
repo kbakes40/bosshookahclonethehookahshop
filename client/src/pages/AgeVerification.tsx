@@ -13,7 +13,7 @@ export default function AgeVerification() {
             <img
               src={THS_LOGO_MARK_SRC}
               alt="The Hookah Shop"
-              className="w-32 max-w-[8rem] h-auto object-contain select-none brutalist-shadow-sm"
+              className="w-32 max-w-[8rem] h-auto object-contain select-none"
               width={128}
               height={128}
             />

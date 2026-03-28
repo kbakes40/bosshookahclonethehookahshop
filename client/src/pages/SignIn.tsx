@@ -52,7 +52,6 @@ export default function SignIn() {
                 className="w-28 max-w-[7rem] h-auto object-contain select-none"
                 width={112}
                 height={112}
-                style={{ boxShadow: "3px 3px 0 0 #0A0A0A" }}
               />
             </div>
 
