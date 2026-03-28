@@ -18,6 +18,7 @@ import {
 } from "@/lib/paypalCheckoutStorage";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
 import type { CartItem } from "@/contexts/CartContext";
+import { triggerHaptic } from "@/lib/haptics";
 
 /** Shown when `bh_store_settings.zelle_*` is empty; keep in sync with store operations. */
 const DEFAULT_ZELLE_PHONE = "313-200-1873";
@@ -154,6 +155,7 @@ export default function ZelleCheckout() {
       setOrderId(result.orderId);
       clearZelleCheckoutCartBackup();
       toast.success("Order created! Please send payment via Zelle");
+      triggerHaptic("confirm");
     } catch (error) {
       console.error("[ZelleCheckout] createZelleOrder failed:", error);
       const msg =
@@ -163,6 +165,7 @@ export default function ZelleCheckout() {
             ? error.message
             : "Failed to create order";
       toast.error(msg);
+      triggerHaptic("error");
     } finally {
       setIsSubmitting(false);
     }

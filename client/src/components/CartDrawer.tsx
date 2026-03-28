@@ -24,6 +24,7 @@ import {
 import { usePlaidLink } from "react-plaid-link";
 import { calculateShipping, orderGrandTotalUsd, FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
+import { triggerHaptic } from "@/lib/haptics";
 
 export default function CartDrawer() {
   const { items, cartTotal, cartCount, isOpen, closeCart, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -73,11 +74,13 @@ export default function CartDrawer() {
         setBankFlow("success");
         clearCart();
         toast.success("Bank payment submitted. Your order is pending processing.");
+        triggerHaptic("confirm");
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Payment failed";
         setBankError(msg);
         setBankFlow("error");
         setPlaidLinkToken(null);
+        triggerHaptic("error");
       }
     },
     onExit: err => {
@@ -85,6 +88,7 @@ export default function CartDrawer() {
       if (err) {
         setBankError(err.display_message || err.error_message || "Bank connection failed.");
         setBankFlow("error");
+        triggerHaptic("error");
       } else {
         setBankFlow("cancelled");
       }
@@ -331,7 +335,10 @@ export default function CartDrawer() {
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => setPaymentMethod("card")}
+              onClick={() => {
+                triggerHaptic("confirm");
+                setPaymentMethod("card");
+              }}
               className={`p-4 brutalist-border flex flex-col items-center gap-2 transition-colors ${
                 paymentMethod === "card"
                   ? "bg-primary text-primary-foreground"
@@ -341,7 +348,10 @@ export default function CartDrawer() {
               <span className="text-sm font-bold">CREDIT CARD</span>
             </button>
             <button
-              onClick={() => setPaymentMethod("zelle")}
+              onClick={() => {
+                triggerHaptic("confirm");
+                setPaymentMethod("zelle");
+              }}
               className={`p-4 brutalist-border flex flex-col items-center gap-2 transition-colors ${
                 paymentMethod === "zelle"
                   ? "bg-primary text-primary-foreground"
@@ -352,7 +362,10 @@ export default function CartDrawer() {
             </button>
             <button
               type="button"
-              onClick={() => setPaymentMethod("bank_transfer")}
+              onClick={() => {
+                triggerHaptic("confirm");
+                setPaymentMethod("bank_transfer");
+              }}
               className={`p-4 brutalist-border flex flex-col items-center gap-2 transition-colors ${
                 paymentMethod === "bank_transfer"
                   ? "bg-primary text-primary-foreground"
@@ -362,7 +375,10 @@ export default function CartDrawer() {
               <span className="text-sm font-bold">PAY BY BANK</span>
             </button>
             <button
-              onClick={() => setPaymentMethod("paypal")}
+              onClick={() => {
+                triggerHaptic("confirm");
+                setPaymentMethod("paypal");
+              }}
               className={`p-4 brutalist-border flex flex-col items-center gap-2 transition-colors ${
                 paymentMethod === "paypal"
                   ? "bg-primary text-primary-foreground"
@@ -388,6 +404,7 @@ export default function CartDrawer() {
                   sessionStorage.removeItem(CHECKOUT_SHIPPING_ZIP_KEY);
                 }
                 saveZelleCheckoutCartBackup(items);
+                triggerHaptic("confirm");
                 closeCart();
                 setLocation(`/zelle-checkout?delivery=${deliveryMethod}`);
               } else if (paymentMethod === "bank_transfer") {
@@ -435,11 +452,13 @@ export default function CartDrawer() {
                   savePlaidCheckoutSession(payload);
                   setBankFlow("linking");
                   setPlaidLinkToken(res.linkToken);
+                  triggerHaptic("confirm");
                 } catch (e) {
                   const msg = e instanceof Error ? e.message : "Could not start bank checkout.";
                   setBankError(msg);
                   setBankFlow("error");
                   toast.error(msg);
+                  triggerHaptic("error");
                 } finally {
                   setIsCheckingOut(false);
                 }
@@ -496,10 +515,12 @@ export default function CartDrawer() {
                 if (!data.approveUrl) {
                   sessionStorage.removeItem(PAYPAL_CHECKOUT_STORAGE_KEY);
                   toast.error("PayPal did not return a redirect URL");
+                  triggerHaptic("error");
                   setIsCheckingOut(false);
                   return;
                 }
                 toast.success("Redirecting to PayPal…");
+                triggerHaptic("confirm");
                 closeCart();
                 window.location.assign(data.approveUrl);
                 return;
@@ -525,10 +546,12 @@ export default function CartDrawer() {
 
                 if (stripeSession.url) {
                   toast.success("Redirecting to checkout…");
+                  triggerHaptic("confirm");
                   closeCart();
                   window.location.assign(stripeSession.url);
                 } else {
                   toast.error("Checkout did not return a payment URL");
+                  triggerHaptic("error");
                 }
               }
             } catch (error: unknown) {
@@ -541,6 +564,7 @@ export default function CartDrawer() {
               } else {
                 toast.error("Failed to create checkout session");
               }
+              triggerHaptic("error");
             } finally {
               setIsCheckingOut(false);
             }

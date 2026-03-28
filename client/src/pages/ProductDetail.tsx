@@ -20,6 +20,7 @@ import { useShopCurrency } from "@/contexts/CurrencyContext";
 import { FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 import { stripHtmlToPlainText } from "@shared/htmlPlainText";
 import { getAuthRedirectOrigin } from "@/lib/authRedirect";
+import { triggerHaptic } from "@/lib/haptics";
 
 const SHARE_DESCRIPTION_MAX_CHARS = 600;
 
@@ -171,11 +172,7 @@ export default function ProductDetail() {
         : product.name;
       
       toast.success(`Added ${quantity} × ${itemName} to cart`);
-      
-      // Haptic vibration feedback
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50); // 50ms vibration
-      }
+      triggerHaptic("light");
     }
   };
 

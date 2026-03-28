@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { triggerHaptic } from "@/lib/haptics";
 
 /**
  * OAuth return target: set `PLAID_REDIRECT_URI` to `${origin}/plaid-oauth` in the Plaid Dashboard.
@@ -57,11 +58,13 @@ export default function PlaidLinkResume() {
         clearPlaidCheckoutSession();
         clearCart();
         toast.success("Bank payment submitted. Your order is pending processing.");
+        triggerHaptic("confirm");
         void navigate("/");
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Payment failed";
         toast.error(msg);
         clearPlaidCheckoutSession();
+        triggerHaptic("error");
         void navigate("/");
       }
     },
