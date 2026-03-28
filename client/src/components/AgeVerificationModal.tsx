@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "./ui/button";
+import { THS_LOGO_MARK_SRC } from "@/lib/thsBrandAssets";
 
 const STORAGE_KEY = "bh_age_verified";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -72,18 +73,20 @@ export default function AgeVerificationModal() {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4">
       <div className="w-full max-w-lg">
         <div className="bg-background brutalist-border p-8">
+          <h2 className="font-display font-black text-2xl mb-4 text-center">
+            Age Verification
+          </h2>
+
           <div className="flex justify-center mb-6">
             <img
-              src="/brand-icon.png"
+              src={THS_LOGO_MARK_SRC}
               alt="The Hookah Shop"
-              className="w-24 h-24 rounded-full object-cover border-2 border-border"
+              className="w-28 max-w-[7rem] h-auto object-contain select-none"
+              width={112}
+              height={112}
               style={{ boxShadow: "3px 3px 0 0 #0A0A0A" }}
             />
           </div>
-
-          <h2 className="font-display font-black text-2xl mb-6 text-center">
-            Age Verification
-          </h2>
 
           <p className="mb-8 text-sm leading-relaxed text-center">
             You must be 21 or older to enter this site. By clicking YES you confirm you are of

@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import { THS_LOGO_MARK_SRC } from "@/lib/thsBrandAssets";
 import Footer from "@/components/Footer";
 
 export default function AgeVerification() {
@@ -7,14 +8,16 @@ export default function AgeVerification() {
       <Header />
       <main className="flex-1 container py-16">
         <div className="max-w-2xl mx-auto">
+          <h1 className="text-5xl font-display font-black mb-4 text-center">AGE VERIFICATION</h1>
           <div className="flex justify-center mb-8">
             <img
-              src="/brand-icon.png"
+              src={THS_LOGO_MARK_SRC}
               alt="The Hookah Shop"
-              className="w-24 h-24 rounded-full object-cover border-2 border-border brutalist-shadow-sm"
+              className="w-32 max-w-[8rem] h-auto object-contain select-none brutalist-shadow-sm"
+              width={128}
+              height={128}
             />
           </div>
-          <h1 className="text-5xl font-display font-black mb-6 text-center">AGE VERIFICATION</h1>
           <div className="brutalist-border bg-secondary p-12 text-left space-y-6">
             <p className="text-2xl font-display font-black">21+ only</p>
             <p className="leading-relaxed">

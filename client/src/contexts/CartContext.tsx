@@ -57,8 +57,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : item
         );
       }
+      const variant = variantId ? product.variants?.find(v => v.id === variantId) : undefined;
+      const linePrice = variant?.price ?? product.price;
+      const lineSale = variant?.salePrice ?? product.salePrice;
       return [...prev, { 
         ...product, 
+        price: linePrice,
+        salePrice: lineSale,
         quantity,
         selectedVariantId: variantId,
         selectedVariantName: variantName

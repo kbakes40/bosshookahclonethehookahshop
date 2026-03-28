@@ -9,6 +9,10 @@ export interface ProductVariant {
   name: string;
   description?: string;
   image?: string;
+  /** Per-variant MSRP / list price (USD) when it differs from parent */
+  price?: number;
+  /** Per-variant sale price (USD) when on sale */
+  salePrice?: number;
 }
 
 export interface Product {

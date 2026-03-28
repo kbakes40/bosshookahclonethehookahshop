@@ -10,7 +10,7 @@ function siteOrigin(): string {
   if (vercel) {
     return `https://${vercel}`;
   }
-  return "https://www.bosshookah.site";
+  return "https://www.thehookahshop.com";
 }
 
 /** Replaces %SITE_ORIGIN% in client/index.html during dev and build. */

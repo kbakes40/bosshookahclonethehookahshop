@@ -13,23 +13,27 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="%SITE_ORIGIN%/" />
     
-    <!-- Open Graph / Facebook — og:image is The Hookah Shop mark (see client/public/og-image.png), not legacy Boss assets -->
+    <!-- Open Graph — og-image.png is the THS hookah mark; used by iMessage/SMS rich previews, Facebook, etc. Requires absolute URL: set VITE_SITE_ORIGIN on Vercel to your live origin (e.g. https://www.davincidynamics.site). -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="%SITE_ORIGIN%/" />
     <meta property="og:title" content="The Hookah Shop - Premium Shisha, Vapes & Charcoal" />
     <meta property="og:description" content="Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at The Hookah Shop. Quality products, competitive prices, and fast shipping." />
     <meta property="og:image" content="%SITE_ORIGIN%/og-image.png" />
+    <meta property="og:image:secure_url" content="%SITE_ORIGIN%/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="The Hookah Shop hookah logo" />
     <meta property="og:site_name" content="The Hookah Shop" />
     <meta property="og:locale" content="en_US" />
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="%SITE_ORIGIN%/" />
-    <meta property="twitter:title" content="The Hookah Shop - Premium Shisha, Vapes & Charcoal" />
-    <meta property="twitter:description" content="Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at The Hookah Shop. Quality products, competitive prices, and fast shipping." />
-    <meta property="twitter:image" content="%SITE_ORIGIN%/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="%SITE_ORIGIN%/" />
+    <meta name="twitter:title" content="The Hookah Shop - Premium Shisha, Vapes & Charcoal" />
+    <meta name="twitter:description" content="Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at The Hookah Shop. Quality products, competitive prices, and fast shipping." />
+    <meta name="twitter:image" content="%SITE_ORIGIN%/og-image.png" />
+    <meta name="twitter:image:alt" content="The Hookah Shop hookah logo" />
     
     <!-- Business Info -->
     <meta name="geo.region" content="US-MI" />
@@ -37,8 +41,7 @@
     <meta name="geo.position" content="42.3386644;-83.1956699" />
     <meta name="ICBM" content="42.3386644, -83.1956699" />
     
-    <!-- Favicon (SVG preferred; ICO + PNG fallbacks for old tabs / Replit cache-bust) -->
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Favicon — THS hookah mark (blue/black); source: client/public/hookah-brand-source.png -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />

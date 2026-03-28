@@ -89,6 +89,9 @@ export default function ProductDetail() {
   const currentImage = currentVariant?.image || product.image;
   const images = [currentImage]; // Use variant-specific image
 
+  const displayRegular = currentVariant?.price ?? product.price;
+  const displaySale = currentVariant?.salePrice ?? product.salePrice;
+
   const handleAddToCart = () => {
     if (product) {
       // Pass selected variant ID to cart
@@ -162,17 +165,17 @@ export default function ProductDetail() {
 
               {/* Price */}
               <div className="mb-6">
-                {product.salePrice ? (
+                {displaySale != null && displaySale < displayRegular ? (
                   <div className="flex items-center gap-3">
                     <span className="text-3xl price-tag font-black text-primary">
-                      {formatUsd(product.salePrice)}
+                      {formatUsd(displaySale)}
                     </span>
                     <span className="text-xl price-tag line-through text-muted-foreground">
-                      {formatUsd(product.price)}
+                      {formatUsd(displayRegular)}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-3xl price-tag font-black">{formatUsd(product.price)}</span>
+                  <span className="text-3xl price-tag font-black">{formatUsd(displayRegular)}</span>
                 )}
               </div>
 

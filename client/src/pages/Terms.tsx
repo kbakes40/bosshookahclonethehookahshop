@@ -16,7 +16,7 @@ export default function Terms() {
           <div className="prose prose-lg max-w-none space-y-8">
             <p className="text-lg leading-relaxed">
               These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and use of
-              bosshookah.site and any purchases you make through The Hookah Shop
+              thehookahshop.com and any purchases you make through The Hookah Shop
               (&quot;The Hookah Shop,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). By
               using the site or placing an order, you agree to these Terms. If you do not agree, do
               not use the site or purchase from us.
@@ -339,7 +339,7 @@ export default function Terms() {
                 <strong>Last updated:</strong> March 25, 2026
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                By using bosshookah.site, you acknowledge that you have read and understood these
+                By using thehookahshop.com, you acknowledge that you have read and understood these
                 Terms and our privacy practices described above.
               </p>
             </section>

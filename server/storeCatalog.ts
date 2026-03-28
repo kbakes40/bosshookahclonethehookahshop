@@ -79,11 +79,15 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
     const sku = String(r.sku ?? "");
     const m = /^catalog:[^:]+:(.+)$/.exec(sku);
     const vid = m ? m[1] : "";
+    const rowPrice = Number(r.price);
+    const rowSale = r.sale_price != null ? Number(r.sale_price) : undefined;
     return {
       id: vid,
       name: extractVariantLabel(String(r.name ?? "")),
       description: r.description ? String(r.description) : undefined,
       image: r.image_url ? String(r.image_url) : undefined,
+      ...(Number.isFinite(rowPrice) && rowPrice > 0 ? { price: rowPrice } : {}),
+      ...(rowSale != null && Number.isFinite(rowSale) ? { salePrice: rowSale } : {}),
     };
   });
 

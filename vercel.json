@@ -7,8 +7,20 @@
   "redirects": [
     {
       "source": "/:path*",
+      "has": [{ "type": "host", "value": "thehookahshop.com" }],
+      "destination": "https://www.thehookahshop.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "bosshookah.site" }],
       "destination": "https://www.bosshookah.site/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "davincidynamics.site" }],
+      "destination": "https://www.davincidynamics.site/:path*",
       "permanent": true
     }
   ],

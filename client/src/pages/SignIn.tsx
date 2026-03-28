@@ -1,4 +1,5 @@
 import { useSupabaseAuth } from "@/lib/SupabaseAuthProvider";
+import { THS_LOGO_MARK_SRC } from "@/lib/thsBrandAssets";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -46,9 +47,11 @@ export default function SignIn() {
             {/* The Hookah Shop Logo */}
             <div className="flex justify-center mb-6">
               <img
-                src="/brand-icon.png"
+                src={THS_LOGO_MARK_SRC}
                 alt="The Hookah Shop"
-                className="w-24 h-24 rounded-full object-cover border-2 border-border"
+                className="w-28 max-w-[7rem] h-auto object-contain select-none"
+                width={112}
+                height={112}
                 style={{ boxShadow: "3px 3px 0 0 #0A0A0A" }}
               />
             </div>

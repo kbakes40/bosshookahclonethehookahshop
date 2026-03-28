@@ -5,7 +5,7 @@
 import { products } from "../client/src/lib/products";
 import type { Product } from "../client/src/lib/products";
 
-const DEFAULT_ORIGIN = "https://www.bosshookah.site";
+const DEFAULT_ORIGIN = "https://www.thehookahshop.com";
 
 function siteOrigin(): string {
   const o =
@@ -84,13 +84,15 @@ export function siteProductsToBhRows(
 
     for (const v of p.variants) {
       const variantImage = v.image ? absImageUrl(v.image, origin) : baseImage;
+      const vPrice = v.price ?? p.price;
+      const vSale = v.salePrice ?? p.salePrice ?? null;
       out.push({
         name: `${p.name} — ${v.name}`,
         brand: p.brand,
         category: p.category,
-        price: p.price,
+        price: vPrice,
         cost: null,
-        sale_price: p.salePrice ?? null,
+        sale_price: vSale,
         stock: defaultStock,
         low_stock_threshold: 10,
         sku: `catalog:${p.id}:${v.id}`,

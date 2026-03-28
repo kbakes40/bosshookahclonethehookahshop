@@ -2,106 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage -->
   <url>
-    <loc>https://www.bosshookah.site/</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   
   <!-- Main Categories -->
   <url>
-    <loc>https://www.bosshookah.site/hookahs</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/hookahs</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/shisha</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/shisha</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/charcoal</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/charcoal</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/vapes</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/vapes</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/accessories</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/accessories</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/bowls</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/bowls</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/wholesale</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/wholesale</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <!-- Brand Collections -->
   <url>
-    <loc>https://www.bosshookah.site/shisha/al-fakher</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/shisha/al-fakher</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/charcoal/cocourth</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/charcoal/cocourth</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/charcoal/titanium</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/charcoal/titanium</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/vapes/geek-bar</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/vapes/geek-bar</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <!-- Featured Products -->
   <url>
-    <loc>https://www.bosshookah.site/product/50</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/product/50</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/product/100</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/product/100</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <!-- Static Pages -->
   <url>
-    <loc>https://www.bosshookah.site/terms</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/terms</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.bosshookah.site/rewards</loc>
-    <lastmod>2026-02-06</lastmod>
+    <loc>https://www.thehookahshop.com/rewards</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
