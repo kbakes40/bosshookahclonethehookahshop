@@ -59,9 +59,11 @@ export default function ZelleCheckout() {
   const storeSettings = trpc.store.getSettings.useQuery();
   const createZelleOrder = trpc.checkout.createZelleOrder.useMutation();
 
-  // Get delivery method from URL params
+  // Get delivery method from URL params (only allow known values — typos must not reach the API)
   const params = new URLSearchParams(window.location.search);
-  const deliveryMethod = (params.get("delivery") as "shipping" | "pickup") || "shipping";
+  const deliveryParam = params.get("delivery");
+  const deliveryMethod: "shipping" | "pickup" =
+    deliveryParam === "pickup" ? "pickup" : "shipping";
 
   const shippingZip =
     typeof window !== "undefined" ? sessionStorage.getItem(CHECKOUT_SHIPPING_ZIP_KEY) ?? "" : "";
@@ -122,7 +124,8 @@ export default function ZelleCheckout() {
       toast.error("Please enter a valid 10-digit US phone number");
       return;
     }
-    const customerPhoneNormalized = `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`;
+    /** Digits only — many DB CHECK constraints expect `[0-9]{10}` without dashes. */
+    const customerPhoneForApi = phoneDigits;
 
     const totalCents = Math.round(orderGrandTotal * 100);
     if (!Number.isFinite(totalCents) || totalCents < 0) {
@@ -144,7 +147,7 @@ export default function ZelleCheckout() {
         items: orderItems,
         deliveryMethod,
         customerName: customerName.trim(),
-        customerPhone: customerPhoneNormalized,
+        customerPhone: customerPhoneForApi,
         totalAmount: totalCents,
       });
 
@@ -180,7 +183,14 @@ export default function ZelleCheckout() {
     return (
       <div className="min-h-screen bg-background py-12">
         <div className="container max-w-2xl">
-          <div className="bg-card brutalist-border brutalist-shadow p-8 space-y-8">
+          <form
+            className="bg-card brutalist-border brutalist-shadow p-8 space-y-8"
+            noValidate
+            onSubmit={e => {
+              e.preventDefault();
+              void handleSubmitOrder();
+            }}
+          >
             {/* Header */}
             <div className="text-center space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 brutalist-border">
@@ -217,6 +227,8 @@ export default function ZelleCheckout() {
                   <Input
                     id="phone"
                     type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
                     placeholder="313-555-1234"
                     value={customerPhone}
                     onChange={handlePhoneChange}
@@ -286,6 +298,7 @@ export default function ZelleCheckout() {
             {/* Actions */}
             <div className="flex gap-4">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => {
                   clearZelleCheckoutCartBackup();
@@ -297,14 +310,14 @@ export default function ZelleCheckout() {
                 CANCEL
               </Button>
               <Button
-                onClick={handleSubmitOrder}
+                type="submit"
                 className="flex-1 brutalist-border brutalist-shadow bg-primary text-primary-foreground"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "CREATING ORDER..." : "CONTINUE TO PAYMENT"}
               </Button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     );

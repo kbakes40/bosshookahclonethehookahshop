@@ -69,16 +69,27 @@ export const checkoutRouter = router({
         items: z.array(
           z.object({
             name: z.string(),
-            priceInCents: z.number(),
-            quantity: z.number(),
+            priceInCents: z.coerce.number().int(),
+            quantity: z.coerce.number().int().positive(),
             image: z.string().optional(),
           })
         ),
-        deliveryMethod: z.enum(["shipping", "pickup"]).default("shipping"),
-        customerName: z.string(),
-        customerPhone: z.string(),
+        deliveryMethod: z
+          .unknown()
+          .transform(v => (v === "pickup" ? "pickup" : "shipping"))
+          .pipe(z.enum(["shipping", "pickup"])),
+        customerName: z.string().min(1),
+        /** 10 US digits (avoids dashed formats that fail common DB CHECK constraints). */
+        customerPhone: z
+          .string()
+          .transform(s => {
+            let d = s.replace(/\D/g, "");
+            if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+            return d;
+          })
+          .pipe(z.string().regex(/^\d{10}$/, "Phone must be 10 digits")),
         /** Cart total in cents (matches Stripe `amount_total`) */
-        totalAmount: z.number().int().nonnegative(),
+        totalAmount: z.coerce.number().int().nonnegative(),
       })
     )
     .mutation(async ({ ctx, input }) => {
