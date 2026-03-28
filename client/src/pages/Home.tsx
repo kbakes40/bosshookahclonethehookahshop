@@ -5,10 +5,22 @@ import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { products as staticCatalog } from "@/lib/products";
+import { products as staticCatalog, type Product } from "@/lib/products";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+/** Bundled catalog first; append Supabase-highlight rows not already present (by id). Avoids empty sections when DB returns [] and keeps shisha/hookah heroes when charcoal/vapes are flagged in DB. */
+function mergeStaticWithDbHighlights(
+  staticList: Product[],
+  dbList: Product[] | undefined,
+  max: number
+): Product[] {
+  const db = dbList ?? [];
+  const staticIds = new Set(staticList.map(p => p.id));
+  const extras = db.filter(p => !staticIds.has(p.id));
+  return [...staticList, ...extras].slice(0, max);
+}
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -25,8 +37,15 @@ export default function Home() {
     placeholderData: staticHighlights,
   });
 
-  const trendingProducts = highlights.data?.trending ?? staticHighlights.trending;
-  const featuredProducts = highlights.data?.featured ?? staticHighlights.featured;
+  const trendingProducts = useMemo(
+    () => mergeStaticWithDbHighlights(staticHighlights.trending, highlights.data?.trending, 24),
+    [staticHighlights.trending, highlights.data?.trending]
+  );
+
+  const featuredProducts = useMemo(
+    () => mergeStaticWithDbHighlights(staticHighlights.featured, highlights.data?.featured, 24),
+    [staticHighlights.featured, highlights.data?.featured]
+  );
 
   // Set page title for SEO (30-60 characters)
   useEffect(() => {
