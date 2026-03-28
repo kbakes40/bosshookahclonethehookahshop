@@ -476,7 +476,7 @@ export default function ZelleCheckout() {
 
           {/* Help Text */}
           <p className="text-xs text-center text-muted-foreground">
-            Questions? Contact us at {storeSettings.data?.phone || "313-406-6589"}
+            Questions? Contact us at {storeSettings.data?.phone || "(313) 200-1873"}
           </p>
         </div>
       </div>

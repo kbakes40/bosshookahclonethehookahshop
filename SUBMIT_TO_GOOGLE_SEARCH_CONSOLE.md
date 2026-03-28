@@ -222,7 +222,7 @@ Your site would benefit from adding structured data (JSON-LD) for:
   "image": "https://www.bosshookah.site/android-chrome-512x512.png",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "6520 Greenfield Rd",
+    "streetAddress": "15320 Michigan Ave",
     "addressLocality": "Dearborn",
     "addressRegion": "MI",
     "postalCode": "48126",
@@ -230,11 +230,11 @@ Your site would benefit from adding structured data (JSON-LD) for:
   },
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": 42.3386644,
-    "longitude": -83.1956699
+    "latitude": 42.317286,
+    "longitude": -83.1936525
   },
   "url": "https://www.bosshookah.site",
-  "telephone": "+13134066589",
+  "telephone": "+13132001873",
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": [
@@ -246,8 +246,8 @@ Your site would benefit from adding structured data (JSON-LD) for:
       "Saturday",
       "Sunday"
     ],
-    "opens": "00:00",
-    "closes": "01:00"
+    "opens": "12:00",
+    "closes": "24:00"
   },
   "priceRange": "$$"
 }

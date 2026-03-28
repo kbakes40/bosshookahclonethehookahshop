@@ -20,15 +20,21 @@ export default function Contact() {
               <div className="space-y-3 text-base">
                 <p>
                   <span className="font-bold">Phone:</span>{" "}
-                  <a href="tel:+13134066589" className="text-primary hover:underline">
-                    (313) 406-6589
+                  <a href="tel:+13132001873" className="text-primary hover:underline">
+                    (313) 200-1873
                   </a>
                 </p>
                 <p>
-                  <span className="font-bold">Address:</span> 6520 Greenfield Rd, Dearborn, MI 48126
+                  <span className="font-bold">Email:</span>{" "}
+                  <a href="mailto:thehookahshoponline@gmail.com" className="text-primary hover:underline">
+                    thehookahshoponline@gmail.com
+                  </a>
                 </p>
                 <p>
-                  <span className="font-bold">Hours:</span> Open daily — closes 1:00 AM
+                  <span className="font-bold">Address:</span> 15320 Michigan Ave, Dearborn, MI 48126
+                </p>
+                <p>
+                  <span className="font-bold">Hours:</span> In-store Mon–Sun 12:00 PM – midnight; phone &amp; web Mon–Sun 11:00 AM – 11:00 PM
                 </p>
               </div>
             </div>

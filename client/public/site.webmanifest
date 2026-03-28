@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "The Hookah Shop",
+  "short_name": "Hookah Shop",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

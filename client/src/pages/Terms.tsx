@@ -286,12 +286,12 @@ export default function Terms() {
               <h3 className="text-xl font-display font-black mt-4">Contact (privacy)</h3>
               <p className="leading-relaxed text-base">
                 For privacy questions or requests, email{" "}
-                <a href="mailto:info@bosshookah.site" className="text-primary font-semibold hover:underline">
-                  info@bosshookah.site
+                <a href="mailto:thehookahshoponline@gmail.com" className="text-primary font-semibold hover:underline">
+                  thehookahshoponline@gmail.com
                 </a>{" "}
                 or call{" "}
-                <a href="tel:+13134066589" className="text-primary font-semibold hover:underline">
-                  (313) 406-6589
+                <a href="tel:+13132001873" className="text-primary font-semibold hover:underline">
+                  (313) 200-1873
                 </a>
                 .
               </p>
@@ -311,21 +311,21 @@ export default function Terms() {
               <div className="bg-secondary brutalist-border p-6 not-prose">
                 <p className="mb-2">
                   <strong>Email:</strong>{" "}
-                  <a href="mailto:info@bosshookah.site" className="text-primary font-semibold hover:underline">
-                    info@bosshookah.site
+                  <a href="mailto:thehookahshoponline@gmail.com" className="text-primary font-semibold hover:underline">
+                    thehookahshoponline@gmail.com
                   </a>
                 </p>
                 <p className="mb-2">
                   <strong>Phone:</strong>{" "}
-                  <a href="tel:+13134066589" className="text-primary font-semibold hover:underline">
-                    (313) 406-6589
+                  <a href="tel:+13132001873" className="text-primary font-semibold hover:underline">
+                    (313) 200-1873
                   </a>
                 </p>
                 <p className="mb-2">
                   <strong>Address:</strong>
                 </p>
                 <p>The Hookah Shop</p>
-                <p>6520 Greenfield Rd</p>
+                <p>15320 Michigan Ave</p>
                 <p>Dearborn, MI 48126</p>
               </div>
               <p className="leading-relaxed">

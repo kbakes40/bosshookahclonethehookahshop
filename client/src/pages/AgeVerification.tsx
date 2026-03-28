@@ -7,6 +7,13 @@ export default function AgeVerification() {
       <Header />
       <main className="flex-1 container py-16">
         <div className="max-w-2xl mx-auto">
+          <div className="flex justify-center mb-8">
+            <img
+              src="/brand-icon.png"
+              alt="The Hookah Shop"
+              className="w-24 h-24 rounded-full object-cover border-2 border-border brutalist-shadow-sm"
+            />
+          </div>
           <h1 className="text-5xl font-display font-black mb-6 text-center">AGE VERIFICATION</h1>
           <div className="brutalist-border bg-secondary p-12 text-left space-y-6">
             <p className="text-2xl font-display font-black">21+ only</p>

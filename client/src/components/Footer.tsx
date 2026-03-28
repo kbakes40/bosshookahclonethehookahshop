@@ -63,18 +63,18 @@ export default function Footer() {
             <div className="pb-6 space-y-4">
               <div>
                 <p className="font-semibold">The Hookah Shop</p>
-                <p>6520 Greenfield Rd</p>
+                <p>15320 Michigan Ave</p>
                 <p>Dearborn, MI 48126</p>
-                <a href="tel:+13134066589" className="mt-2 inline-block hover:text-primary transition-colors">(313) 406-6589</a>
+                <a href="tel:+13132001873" className="mt-2 inline-block hover:text-primary transition-colors">(313) 200-1873</a>
               </div>
               <div>
                 <p className="font-semibold">Store Hours</p>
-                <p>Open Daily</p>
-                <p>Closes 1:00 AM</p>
+                <p>In-store: Mon–Sun, 12 PM – midnight</p>
+                <p>Phone &amp; web: Mon–Sun, 11 AM – 11 PM</p>
               </div>
               <div>
                 <a 
-                  href="https://maps.app.goo.gl/2sXDxnhukx8pzuW3A" 
+                  href="https://www.google.com/maps/search/?api=1&query=15320+Michigan+Ave+Dearborn+MI+48126" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-block text-primary hover:underline font-semibold"

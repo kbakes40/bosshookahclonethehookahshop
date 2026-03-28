@@ -23,7 +23,7 @@ Your Google Business Profile is currently showing Instagram as the website. Let'
    - Click "Save" or "Apply"
 
 5. **Verify the Change**
-   - Go to your Google Maps listing: https://maps.app.goo.gl/2sXDxnhukx8pzuW3A
+   - Go to your Google Maps listing for **15320 Michigan Ave, Dearborn, MI 48126** and confirm the website shows www.bosshookah.site
    - Check that the website now shows www.bosshookah.site
    - Changes may take a few minutes to appear
 
@@ -46,7 +46,7 @@ Your profile has good photos, but adding more will help:
 Add a more detailed description with keywords:
 
 ```
-The Hookah Shop is Dearborn's premier destination for premium hookahs, shisha tobacco, vapes, and smoking accessories. Located at 6520 Greenfield Rd, we offer an extensive selection of top brands including Al Fakher, Starbuzz, Geek Bar, and more. 
+The Hookah Shop is Dearborn's premier destination for premium hookahs, shisha tobacco, vapes, and smoking accessories. Located at 15320 Michigan Ave, we offer an extensive selection of top brands including Al Fakher, Starbuzz, Geek Bar, and more. 
 
 We specialize in:
 • Premium Hookahs (Modern & Traditional)
@@ -56,7 +56,7 @@ We specialize in:
 • Hookah Accessories & Parts
 • Wholesale Pricing Available
 
-Open daily until 1 AM with in-store shopping and curbside pickup. Visit us or shop online at www.bosshookah.site. Serving Dearborn, Detroit, and surrounding areas with quality products and competitive prices.
+In-store Mon–Sun 12 PM–midnight; phone and web Mon–Sun 11 AM–11 PM. In-store shopping and curbside pickup. Visit us or shop online at www.bosshookah.site. Serving Dearborn, Detroit, and surrounding areas with quality products and competitive prices.
 ```
 
 ### 3. Add Products
@@ -89,13 +89,13 @@ You have 257 reviews (4.6 stars) - great! Make sure to:
 Proactively add common questions:
 
 **Q: Do you offer wholesale pricing?**
-A: Yes! We offer competitive wholesale prices for retailers and hookah lounges. Call us at (313) 406-6589 or visit our website at www.bosshookah.site for wholesale inquiries.
+A: Yes! We offer competitive wholesale prices for retailers and hookah lounges. Call us at (313) 200-1873 or visit our website at www.bosshookah.site for wholesale inquiries.
 
 **Q: What are your hours?**
-A: We're open daily and close at 1:00 AM. Visit us at 6520 Greenfield Rd, Dearborn, MI 48126.
+A: In-store Mon–Sun 12 PM–midnight; phone and web Mon–Sun 11 AM–11 PM. Visit us at 15320 Michigan Ave, Dearborn, MI 48126.
 
 **Q: Do you have curbside pickup?**
-A: Yes! We offer curbside pickup. Order online at www.bosshookah.site or call (313) 406-6589 when you arrive.
+A: Yes! We offer curbside pickup. Order online at www.bosshookah.site or call (313) 200-1873 when you arrive.
 
 **Q: What brands do you carry?**
 A: We carry all major brands including Al Fakher, Starbuzz, Geek Bar, and many more. Browse our full selection at www.bosshookah.site.

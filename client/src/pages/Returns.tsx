@@ -69,10 +69,10 @@ export default function Returns() {
             <section className="space-y-3 border-t-3 border-border pt-6">
               <p className="leading-relaxed">
                 Questions about this policy? Call us at{" "}
-                <a href="tel:+13134066589" className="text-primary font-semibold hover:underline">
-                  (313) 406-6589
+                <a href="tel:+13132001873" className="text-primary font-semibold hover:underline">
+                  (313) 200-1873
                 </a>{" "}
-                or visit our store at 6520 Greenfield Rd, Dearborn, MI 48126.
+                or visit our store at 15320 Michigan Ave, Dearborn, MI 48126.
               </p>
             </section>
           </div>

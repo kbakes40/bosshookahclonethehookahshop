@@ -46,7 +46,7 @@ export default function SignIn() {
             {/* The Hookah Shop Logo */}
             <div className="flex justify-center mb-6">
               <img
-                src="/favicon.svg"
+                src="/brand-icon.png"
                 alt="The Hookah Shop"
                 className="w-24 h-24 rounded-full object-cover border-2 border-border"
                 style={{ boxShadow: "3px 3px 0 0 #0A0A0A" }}

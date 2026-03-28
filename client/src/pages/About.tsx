@@ -15,7 +15,7 @@ export default function About() {
                 The Hookah Shop is a Dearborn-rooted retailer built for people who take their
                 sessions seriously. From the neighborhood regular to the buyer stocking a lounge or
                 shop, we speak the language of quality bowls, clean draws, and gear that lasts —
-                because we live it every day on the showroom floor until 1:00 AM.
+                because we live it every day on the showroom floor.
               </p>
             </div>
 
@@ -35,7 +35,7 @@ export default function About() {
                 You get straight answers, fair pricing, and a team that actually uses what we sell.
                 We respect the 21+ nature of this business, enforce verification without drama, and
                 ship and fulfill with the same discipline we apply in-store. Whether you walk into{" "}
-                <span className="font-semibold">6520 Greenfield Rd</span> or order online, expect a
+                <span className="font-semibold">15320 Michigan Ave</span> or order online, expect a
                 premium retail experience — not a drop-ship roulette.
               </p>
             </div>
@@ -61,9 +61,9 @@ export default function About() {
             </div>
 
             <p className="text-sm text-muted-foreground pt-2 border-t-3 border-border">
-              <span className="font-semibold">Visit us:</span> Open daily, closes 1:00 AM ·{" "}
-              <a href="tel:+13134066589" className="text-primary hover:underline">
-                (313) 406-6589
+              <span className="font-semibold">Visit us:</span> Mon–Sun 12 PM – midnight (in-store); phone &amp; web 11 AM – 11 PM ·{" "}
+              <a href="tel:+13132001873" className="text-primary hover:underline">
+                (313) 200-1873
               </a>
             </p>
           </div>

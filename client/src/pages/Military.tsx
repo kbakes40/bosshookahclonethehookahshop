@@ -23,10 +23,10 @@ export default function Military() {
             </p>
             <p className="text-sm text-muted-foreground">
               For current military offers and how to verify in-store or over the phone, call{" "}
-              <a href="tel:+13134066589" className="text-primary font-semibold hover:underline">
-                (313) 406-6589
+              <a href="tel:+13132001873" className="text-primary font-semibold hover:underline">
+                (313) 200-1873
               </a>{" "}
-              or visit us at 6520 Greenfield Rd, Dearborn, MI 48126.
+              or visit us at 15320 Michigan Ave, Dearborn, MI 48126.
             </p>
           </div>
         </div>

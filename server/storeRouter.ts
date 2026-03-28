@@ -17,15 +17,16 @@ const defaultStoreSettings = () =>
   mapStoreSettingsRow({
     id: null,
     store_name: "The Hookah Shop",
-    address: "6520 Greenfield Rd",
+    address: "15320 Michigan Ave",
     city: "Dearborn",
     state: "MI",
     zip_code: "48126",
-    phone: "(313) 406-6589",
-    email: "info@bosshookah.com",
-    hours: "Open Daily\nCloses 1:00 AM",
+    phone: "(313) 200-1873",
+    email: "thehookahshoponline@gmail.com",
+    hours:
+      "In-store: Mon–Sun, 12:00 PM – Midnight\nPhone & web: Mon–Sun, 11:00 AM – 11:00 PM",
     pickup_instructions:
-      "Please bring your order confirmation and a valid ID when picking up your order. Call us at (313) 406-6589 if you have any questions.",
+      "Please bring your order confirmation and a valid ID when picking up your order. Call or text us at (313) 200-1873 if you have any questions.",
     zelle_email: null,
     zelle_phone: "313-200-1873",
     created_at: new Date().toISOString(),

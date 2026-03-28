@@ -530,8 +530,8 @@ export default function CartDrawer() {
               </p>
               <p>
                 Call{" "}
-                <a href="tel:+13134066589" className="font-bold text-primary hover:underline">
-                  (313) 406-6589
+                <a href="tel:+13132001873" className="font-bold text-primary hover:underline">
+                  (313) 200-1873
                 </a>{" "}
                 or visit our{" "}
                 <Link href="/contact" className="font-bold text-primary hover:underline" onClick={closeCart}>
