@@ -103,6 +103,9 @@ jspm_packages/
 tmp/
 temp/
 
+# Local importer / CLI reports (may contain large JSON)
+reports/
+
 # Database
 *.db
 *.sqlite

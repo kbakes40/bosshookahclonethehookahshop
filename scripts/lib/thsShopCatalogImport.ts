@@ -225,6 +225,107 @@ export async function fetchAllShopParentProducts(perPage = 100): Promise<WcProdu
   return out.filter(p => p.parent === 0);
 }
 
+type WcCategoryTree = WcCategory & { parent?: number };
+
+/**
+ * Woo Store API category list (single page — THS uses &lt;100 taxonomy terms).
+ * `slug` query param is ignored by this endpoint on many installs; filter client-side.
+ */
+export async function fetchAllStoreCategories(perPage = 100): Promise<WcCategoryTree[]> {
+  const url = `${THS_STORE_BASE}/products/categories?per_page=${perPage}`;
+  return fetchJson<WcCategoryTree[]>(url);
+}
+
+/** Resolve top-level Woo category id, e.g. `vapes` → 338 on thehookahshop.com. */
+export async function resolveWooCategoryRootIdBySlug(slug: string): Promise<number> {
+  const want = slug.replace(/&amp;/g, "&").trim().toLowerCase();
+  const all = await fetchAllStoreCategories();
+  const found = all.find(c => decodeSlug(c.slug) === want && (c.parent === 0 || c.parent == null));
+  if (!found) {
+    const any = all.find(c => decodeSlug(c.slug) === want);
+    if (any) return any.id;
+    throw new Error(`Woo category slug not found in Store API: "${slug}"`);
+  }
+  return found.id;
+}
+
+/** BFS: root id + every descendant category id (for archives like /product-category/vapes/). */
+export async function fetchWooCategoryTreeIds(rootId: number): Promise<number[]> {
+  const all = await fetchAllStoreCategories();
+  const byParent = new Map<number, number[]>();
+  for (const c of all) {
+    const p = typeof c.parent === "number" ? c.parent : 0;
+    if (!byParent.has(p)) byParent.set(p, []);
+    byParent.get(p)!.push(c.id);
+  }
+  const out = new Set<number>([rootId]);
+  const stack = [rootId];
+  while (stack.length) {
+    const id = stack.pop()!;
+    for (const ch of byParent.get(id) ?? []) {
+      if (!out.has(ch)) {
+        out.add(ch);
+        stack.push(ch);
+      }
+    }
+  }
+  const idList: number[] = [];
+  out.forEach(id => idList.push(id));
+  return idList;
+}
+
+/** Paginate `GET /products?category=` for one Woo category id (parent products only). */
+export async function fetchParentProductsForWooCategory(
+  wooCategoryId: number,
+  perPage = 100
+): Promise<WcProduct[]> {
+  const out: WcProduct[] = [];
+  let page = 1;
+  let totalPages = 1;
+  for (;;) {
+    const url = `${THS_STORE_BASE}/products?category=${wooCategoryId}&per_page=${perPage}&page=${page}`;
+    const res = await fetch(url, {
+      headers: { Accept: "application/json", "User-Agent": FETCH_UA },
+    });
+    if (!res.ok) throw new Error(`${res.status} ${url}: ${await res.text().catch(() => "")}`);
+    if (page === 1) {
+      const tp = res.headers.get("X-WP-TotalPages");
+      if (tp) totalPages = Math.max(1, parseInt(tp, 10) || 1);
+    }
+    const batch = (await res.json()) as WcProduct[];
+    out.push(...batch);
+    if (batch.length < perPage || page >= totalPages) break;
+    page += 1;
+  }
+  return out.filter(p => p.parent === 0);
+}
+
+/**
+ * All parent products assigned to a Woo category **or any of its descendants**, de-duplicated by WP id.
+ * Matches behavior of /product-category/{slug}/ archives that include child terms.
+ */
+export async function fetchAllParentProductsInWooCategoryTree(
+  rootWooCategoryId: number,
+  perPage = 100
+): Promise<WcProduct[]> {
+  const treeIds = await fetchWooCategoryTreeIds(rootWooCategoryId);
+  const idSet = new Set(treeIds);
+  const seen = new Set<number>();
+  const merged: WcProduct[] = [];
+
+  for (const catId of treeIds) {
+    const batch = await fetchParentProductsForWooCategory(catId, perPage);
+    for (const p of batch) {
+      if (!p.categories?.some(c => idSet.has(c.id))) continue;
+      if (seen.has(p.id)) continue;
+      seen.add(p.id);
+      merged.push(p);
+    }
+  }
+
+  return merged;
+}
+
 export async function fetchVariations(parentId: number): Promise<WcProduct[]> {
   const url = `${THS_STORE_BASE}/products?type=variation&parent=${parentId}&per_page=100`;
   return fetchJson<WcProduct[]>(url);
