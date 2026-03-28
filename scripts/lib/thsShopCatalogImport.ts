@@ -392,6 +392,23 @@ export function mapThsCategoriesToSiteCategory(cats: WcCategory[]): string {
   if (/(vape|e-cigarette|disposable|puffs|crown bar|booma|foger|kang vape|breeze smoke|shmizz|ek6000|vision 15|max 15k)/i.test(blob)) {
     return "vapes";
   }
+  // Woo archive "Hookah Accessories" slug is `hookah-accessories`; those terms were wrongly bucketed as full `hookahs` below.
+  if (
+    /(hookah-accessories|hookahs-accessories|foils?|grommets?|tongs?|hoses?|mouth[\s-]?pieces?|mouth[\s-]?tips?|brushes?|wind[\s-]?covers?|charcoal[\s-]?holders?|heat[\s-]?management|kaloud|lotus|carb[\s-]?caps?|pokers?|pre[\s-]?poked)/i.test(
+      blob
+    ) ||
+    (/\baccessories\b/i.test(blob) && /hookah/i.test(blob))
+  ) {
+    if (
+      /(bowl|bowls|phunnel|shisha-bowl|oblako|clay bowl|glass bowl|silicone bowl|head\b|eastern nights|eltahan|mob-hookah-bowl)/i.test(
+        blob
+      ) &&
+      !/tobacco/i.test(blob)
+    ) {
+      return "bowls";
+    }
+    return "accessories";
+  }
   if (/hookah/i.test(blob) && !/bowl|tobacco|foil|hose|grommet|tongs/i.test(blob)) {
     if (/bowl/i.test(blob)) return "bowls";
     return "hookahs";
@@ -728,6 +745,16 @@ export function buildEnrichmentPatch(ex: ExistingBhRow, ins: BhProductInsert, no
       }
     }
     if (changed) patch.import_meta = prev;
+  }
+
+  const thsSource =
+    insMeta &&
+    typeof insMeta === "object" &&
+    (insMeta as { source?: string }).source === "thehookahshop-woo-store-api";
+  const exCat = (ex.category ?? "").trim().toLowerCase();
+  const insCat = (ins.category ?? "").trim().toLowerCase();
+  if (thsSource && insCat && insCat !== exCat) {
+    patch.category = ins.category;
   }
 
   return patch;

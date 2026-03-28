@@ -16,6 +16,8 @@
  *
  * THS Woo top-level slugs (Store API): vapes, hookahs, shisha-tobacco, charcoal, hookah-accessories, …
  *
+ * Row category: derived per product via `mapThsCategoriesToSiteCategory` (Woo terms), not the CLI bucket.
+ *
  * Env (--apply): VITE_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  * Migration: supabase/migrations/011_bh_products_import_source.sql
  */
@@ -35,6 +37,7 @@ import {
   fetchWooCategoryTreeIds,
   fetchVariations,
   findDuplicateForRow,
+  mapThsCategoriesToSiteCategory,
   patchHasEnrichment,
   resolveWooCategoryRootIdBySlug,
   THS_STORE_BASE,
@@ -131,7 +134,8 @@ async function main(): Promise<void> {
     allowPositionals: false,
   });
 
-  const siteCategory = (storeCategory ?? "vapes").trim().toLowerCase();
+  /** CLI hint only (logging / report); each row uses `mapThsCategoriesToSiteCategory`. */
+  const cliStoreCategoryHint = (storeCategory ?? "vapes").trim().toLowerCase();
   let wooRootId: number;
   if (wooRootStr != null && `${wooRootStr}`.trim() !== "") {
     wooRootId = parseInt(`${wooRootStr}`.trim(), 10);
@@ -152,7 +156,7 @@ async function main(): Promise<void> {
   const outsideTree: { name: string; wpId: number; reason: string }[] = [];
 
   console.log(
-    `Fetching THS Woo category tree root ${wooRootId} (slug=${slug ?? "vapes"}) → bh_products.category="${siteCategory}" …`
+    `Fetching THS Woo category tree root ${wooRootId} (slug=${slug ?? "vapes"}) — bh_products.category from Woo terms per product (CLI hint: ${cliStoreCategoryHint}) …`
   );
 
   const treeIdList = await fetchWooCategoryTreeIds(wooRootId);
@@ -249,7 +253,8 @@ async function main(): Promise<void> {
       }
     }
 
-    const rows = wcProductToBhRows(wp, siteCategory, variations, { defaultStock, now });
+    const rowCategory = mapThsCategoriesToSiteCategory(wp.categories ?? []);
+    const rows = wcProductToBhRows(wp, rowCategory, variations, { defaultStock, now });
     for (const r of rows) {
       preparedRows.push(r);
       rowMeta.push({
@@ -317,7 +322,8 @@ async function main(): Promise<void> {
     source: `${THS_STORE_BASE}/products?category=<tree:${wooRootId}>`,
     landingPage: `https://thehookahshop.com/product-category/${slug ?? "vapes"}/`,
     wooRootCategoryId: wooRootId,
-    storeCategory: siteCategory,
+    cliStoreCategoryHint,
+    categoryAssignment: "per-product-woo-terms",
     totalProductsFound: listed.length,
     totalOutsideCategoryTree: outsideTree.length,
     totalExcluded: excludedList.length,
@@ -364,12 +370,12 @@ async function main(): Promise<void> {
         ? ` --slug ${`${slug}`.trim()}`
         : "";
     const catPart =
-      siteCategory !== "vapes"
-        ? ` --store-category ${siteCategory}`
+      cliStoreCategoryHint !== "vapes"
+        ? ` --store-category ${cliStoreCategoryHint}`
         : "";
     console.log("Run import with:");
     console.log(
-      `  pnpm exec tsx scripts/import-ths-category.ts${slugPart}${catPart} --apply --report ./reports/ths-${siteCategory}-apply.json`
+      `  pnpm exec tsx scripts/import-ths-category.ts${slugPart}${catPart} --apply --report ./reports/ths-${cliStoreCategoryHint}-apply.json`
     );
     return;
   }

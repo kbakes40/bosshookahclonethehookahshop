@@ -7,6 +7,7 @@ const CATEGORY_SYNONYM_GROUPS: string[][] = [
   ["vapes", "vape"],
   ["bowls", "bowl"],
   ["hookahs", "hookah"],
+  ["accessories", "accessory"],
 ];
 
 function categorySynonymSet(filterLower: string): Set<string> | null {
