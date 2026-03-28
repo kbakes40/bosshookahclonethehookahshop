@@ -18,29 +18,10 @@ import { useCart } from "@/contexts/CartContext";
 import { trpc } from "@/lib/trpc";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
 import { FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
+import { stripHtmlToPlainText } from "@shared/htmlPlainText";
 import { getAuthRedirectOrigin } from "@/lib/authRedirect";
 
 const SHARE_DESCRIPTION_MAX_CHARS = 600;
-
-function plainTextFromHtml(html: string, maxLen: number): string {
-  const raw = html.trim();
-  if (!raw) return "";
-  const stripped = raw
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, "\u0022")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
-    .replace(/\s+/g, " ")
-    .trim();
-  if (stripped.length <= maxLen) return stripped;
-  return `${stripped.slice(0, maxLen - 1).trim()}…`;
-}
 
 function toAbsoluteImageUrl(src: string, origin: string): string {
   const s = src.trim();
@@ -209,7 +190,7 @@ export default function ProductDetail() {
     const rawDesc = [product.description, currentVariant?.description]
       .filter(s => typeof s === "string" && s.trim().length > 0)
       .join("\n\n");
-    const descPlain = plainTextFromHtml(rawDesc, SHARE_DESCRIPTION_MAX_CHARS);
+    const descPlain = stripHtmlToPlainText(rawDesc, SHARE_DESCRIPTION_MAX_CHARS);
     const text = descPlain ? `${headline}\n\n${descPlain}` : headline;
 
     const absImage = toAbsoluteImageUrl(currentImage, origin);

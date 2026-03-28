@@ -23,4 +23,15 @@ declare module "./_server.mjs" {
     res: unknown
   ): Promise<void>;
   export function registerProductsLookupRoutes(app: Express): void;
+  export function publicRequestOrigin(req: unknown): string;
+  export function buildOpenGraphProductMeta(
+    productId: string,
+    requestOrigin: string,
+    variantId?: string | null
+  ): Promise<{
+    title: string;
+    description: string;
+    image: string;
+    url: string;
+  } | null>;
 }

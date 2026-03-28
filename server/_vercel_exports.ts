@@ -6,3 +6,5 @@ export { ENV } from "./_core/env";
 export { registerPayPalRoutes } from "./paypalRoutes";
 export { handleAdminAnalyticsOverview, handleAdminAnalyticsTest } from "./adminAnalyticsHttp";
 export { registerProductsLookupRoutes } from "./productsLookupHttp";
+export { publicRequestOrigin } from "./_core/requestOrigin";
+export { buildOpenGraphProductMeta } from "./openGraphProduct";

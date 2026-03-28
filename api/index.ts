@@ -12,6 +12,8 @@ import {
   handleAdminAnalyticsOverview,
   handleAdminAnalyticsTest,
   registerProductsLookupRoutes,
+  buildOpenGraphProductMeta,
+  publicRequestOrigin,
 } from "./_server.mjs";
 
 const app = express();
@@ -49,6 +51,28 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 registerPayPalRoutes(app);
 registerProductsLookupRoutes(app);
+
+/** JSON for Edge middleware — product Open Graph (link previews / iMessage). */
+app.get("/api/og-meta", async (req, res) => {
+  try {
+    const id = String(req.query.id ?? "").trim();
+    if (!id) {
+      res.status(400).json({ error: "missing id" });
+      return;
+    }
+    const origin = publicRequestOrigin(req);
+    const variant = String(req.query.variant ?? "").trim() || undefined;
+    const meta = await buildOpenGraphProductMeta(id, origin, variant);
+    if (!meta) {
+      res.status(404).json({ error: "not found" });
+      return;
+    }
+    res.json(meta);
+  } catch (e) {
+    console.error("[api/og-meta]", e);
+    res.status(500).json({ error: "failed" });
+  }
+});
 
 app.get("/api/admin/analytics/overview", (req, res) => {
   void handleAdminAnalyticsOverview(req, res);
