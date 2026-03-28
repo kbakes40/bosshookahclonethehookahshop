@@ -43,6 +43,7 @@ import AdminSales from "./pages/AdminSales";
 import AdminPlaceholder from "./pages/AdminPlaceholder";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import ZelleCheckout from "./pages/ZelleCheckout";
+import PlaidLinkResume from "./pages/PlaidLinkResume";
 function Router() {
   const [location] = useLocation();
   
@@ -61,6 +62,7 @@ function Router() {
       <Route path={"/checkout/paypal-return"} component={CheckoutPayPalReturn} />
       <Route path={"/checkout/cancel"} component={CheckoutCancel} />
       <Route path={"/zelle-checkout"} component={ZelleCheckout} />
+      <Route path={"/plaid-oauth"} component={PlaidLinkResume} />
       <Route path={"/sign-in"} component={SignIn} />
       <Route path={"/auth/callback"} component={AuthCallback} />
       <Route path={"/create-account"} component={CreateAccount} />

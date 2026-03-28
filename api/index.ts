@@ -9,6 +9,7 @@ import {
   handleWebhookEvent,
   ENV,
   registerPayPalRoutes,
+  registerPlaidRoutes,
   handleAdminAnalyticsOverview,
   handleAdminAnalyticsTest,
   registerProductsLookupRoutes,
@@ -50,6 +51,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 registerPayPalRoutes(app);
+registerPlaidRoutes(app);
 registerProductsLookupRoutes(app);
 
 /** JSON for Edge middleware — product Open Graph (link previews / iMessage). */

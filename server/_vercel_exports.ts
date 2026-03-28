@@ -4,6 +4,7 @@ export { createContext } from "./_core/context";
 export { stripe, handleWebhookEvent } from "./stripe";
 export { ENV } from "./_core/env";
 export { registerPayPalRoutes } from "./paypalRoutes";
+export { registerPlaidRoutes } from "./plaidRoutes";
 export { handleAdminAnalyticsOverview, handleAdminAnalyticsTest } from "./adminAnalyticsHttp";
 export { registerProductsLookupRoutes } from "./productsLookupHttp";
 export { publicRequestOrigin } from "./_core/requestOrigin";

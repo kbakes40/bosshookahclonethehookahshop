@@ -23,6 +23,7 @@ export function mapOrderRow(o: Record<string, unknown>) {
     updatedAt: String(o.updated_at ?? o.created_at ?? new Date().toISOString()),
     items: o.items,
     stripeSessionId: (o.stripe_session_id as string) ?? null,
+    paymentMetadata: (o.payment_metadata as Record<string, unknown> | null | undefined) ?? null,
   };
 }
 

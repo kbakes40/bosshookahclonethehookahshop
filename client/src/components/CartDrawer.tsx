@@ -8,7 +8,7 @@ import { X, Minus, Plus, Trash2, Truck, Store } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import {
@@ -16,6 +16,12 @@ import {
   CHECKOUT_SHIPPING_ZIP_KEY,
   saveZelleCheckoutCartBackup,
 } from "@/lib/paypalCheckoutStorage";
+import {
+  clearPlaidCheckoutSession,
+  savePlaidCheckoutSession,
+  type PlaidCheckoutSessionPayload,
+} from "@/lib/plaidCheckoutSession";
+import { usePlaidLink } from "react-plaid-link";
 import { calculateShipping, orderGrandTotalUsd, FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
 
@@ -25,10 +31,71 @@ export default function CartDrawer() {
   const [, setLocation] = useLocation();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("shipping");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "zelle" | "bitcoin" | "paypal">("card");
-  const [bitcoinInfoOpen, setBitcoinInfoOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "zelle" | "bank_transfer" | "paypal">(
+    "card"
+  );
+  const [bankModalOpen, setBankModalOpen] = useState(false);
+  type BankFlow = "closed" | "preparing" | "linking" | "processing" | "success" | "error" | "cancelled";
+  const [bankFlow, setBankFlow] = useState<BankFlow>("closed");
+  const [bankError, setBankError] = useState<string | null>(null);
+  const [plaidLinkToken, setPlaidLinkToken] = useState<string | null>(null);
+  const plaidPayloadRef = useRef<PlaidCheckoutSessionPayload | null>(null);
+  const transferIntentIdRef = useRef<string | null>(null);
   const [shippingZip, setShippingZip] = useState("");
   const createCheckoutSession = trpc.checkout.createSession.useMutation();
+  const createPlaidSession = trpc.checkout.createPlaidBankSession.useMutation();
+  const completePlaidOrder = trpc.checkout.completePlaidBankOrder.useMutation();
+
+  const { open: openPlaid, ready: plaidReady } = usePlaidLink({
+    token: plaidLinkToken,
+    onSuccess: async (publicToken, meta) => {
+      const p = plaidPayloadRef.current;
+      const tid = transferIntentIdRef.current;
+      if (!p || !tid) return;
+      setBankFlow("processing");
+      setBankError(null);
+      try {
+        await completePlaidOrder.mutateAsync({
+          publicToken,
+          transferIntentId: tid,
+          items: p.items,
+          deliveryMethod: p.deliveryMethod,
+          shippingCents: p.shippingCents,
+          shippingZip: p.shippingZip,
+          linkTransferStatus: meta.transfer_status,
+          institutionName: meta.institution?.name,
+          linkSessionId: meta.link_session_id,
+        });
+        clearPlaidCheckoutSession();
+        setPlaidLinkToken(null);
+        transferIntentIdRef.current = null;
+        plaidPayloadRef.current = null;
+        setBankFlow("success");
+        clearCart();
+        toast.success("Bank payment submitted. Your order is pending processing.");
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Payment failed";
+        setBankError(msg);
+        setBankFlow("error");
+        setPlaidLinkToken(null);
+      }
+    },
+    onExit: err => {
+      setPlaidLinkToken(null);
+      if (err) {
+        setBankError(err.display_message || err.error_message || "Bank connection failed.");
+        setBankFlow("error");
+      } else {
+        setBankFlow("cancelled");
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (plaidLinkToken && plaidReady && bankFlow === "linking") {
+      openPlaid();
+    }
+  }, [plaidLinkToken, plaidReady, bankFlow, openPlaid]);
 
   const shippingQuote = useMemo(
     () =>
@@ -285,17 +352,14 @@ export default function CartDrawer() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setPaymentMethod("bitcoin");
-                setBitcoinInfoOpen(true);
-              }}
+              onClick={() => setPaymentMethod("bank_transfer")}
               className={`p-4 brutalist-border flex flex-col items-center gap-2 transition-colors ${
-                paymentMethod === "bitcoin"
+                paymentMethod === "bank_transfer"
                   ? "bg-primary text-primary-foreground"
                   : "bg-background hover:bg-secondary"
               }`}
             >
-              <span className="text-sm font-bold">BITCOIN</span>
+              <span className="text-sm font-bold">PAY BY BANK</span>
             </button>
             <button
               onClick={() => setPaymentMethod("paypal")}
@@ -326,9 +390,59 @@ export default function CartDrawer() {
                 saveZelleCheckoutCartBackup(items);
                 closeCart();
                 setLocation(`/zelle-checkout?delivery=${deliveryMethod}`);
-              } else if (paymentMethod === "bitcoin") {
-                setBitcoinInfoOpen(true);
-                setIsCheckingOut(false);
+              } else if (paymentMethod === "bank_transfer") {
+                const {
+                  data: { session },
+                } = await supabase.auth.getSession();
+                if (!session?.access_token) {
+                  toast.error("Please log in to checkout");
+                  setIsCheckingOut(false);
+                  return;
+                }
+
+                const checkoutItems = items.map(item => {
+                  const itemName = item.selectedVariantName
+                    ? `${item.brand} - ${item.name} - ${item.selectedVariantName}`
+                    : `${item.brand} - ${item.name}`;
+                  return {
+                    name: itemName,
+                    priceInCents: Math.round((item.salePrice || item.price) * 100),
+                    quantity: item.quantity,
+                    image: item.image,
+                  };
+                });
+
+                setBankError(null);
+                setBankModalOpen(true);
+                setBankFlow("preparing");
+
+                try {
+                  const res = await createPlaidSession.mutateAsync({
+                    items: checkoutItems,
+                    deliveryMethod,
+                    shippingCents: Math.round(shippingQuote.shippingAmount * 100),
+                  });
+                  transferIntentIdRef.current = res.transferIntentId;
+                  const payload: PlaidCheckoutSessionPayload = {
+                    linkToken: res.linkToken,
+                    transferIntentId: res.transferIntentId,
+                    items: checkoutItems,
+                    deliveryMethod,
+                    shippingCents: Math.round(shippingQuote.shippingAmount * 100),
+                    shippingZip: deliveryMethod === "shipping" ? shippingZip.trim() : undefined,
+                  };
+                  plaidPayloadRef.current = payload;
+                  savePlaidCheckoutSession(payload);
+                  setBankFlow("linking");
+                  setPlaidLinkToken(res.linkToken);
+                } catch (e) {
+                  const msg = e instanceof Error ? e.message : "Could not start bank checkout.";
+                  setBankError(msg);
+                  setBankFlow("error");
+                  toast.error(msg);
+                } finally {
+                  setIsCheckingOut(false);
+                }
                 return;
               } else if (paymentMethod === "paypal") {
                 const {
@@ -508,10 +622,19 @@ export default function CartDrawer() {
         </div>
       </div>
 
-      {bitcoinInfoOpen && (
+      {bankModalOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setBitcoinInfoOpen(false)}
+          onClick={() => {
+            if (bankFlow === "preparing" || bankFlow === "linking" || bankFlow === "processing") {
+              return;
+            }
+            setBankModalOpen(false);
+            setBankFlow("closed");
+            setBankError(null);
+            setPlaidLinkToken(null);
+            clearPlaidCheckoutSession();
+          }}
           role="presentation"
         >
           <div
@@ -519,39 +642,72 @@ export default function CartDrawer() {
             onClick={e => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="cart-bitcoin-title"
+            aria-labelledby="cart-bank-title"
           >
             <h3
-              id="cart-bitcoin-title"
+              id="cart-bank-title"
               className="font-display font-black text-xl md:text-2xl text-center mb-6 tracking-tight"
             >
-              BITCOIN PAYMENT
+              PAY BY BANK
             </h3>
-            <div className="space-y-4 mb-8 text-sm leading-relaxed text-center text-foreground">
-              <p>
-                Bitcoin checkout is available <span className="font-bold">on request</span>. Reach out and
-                we&apos;ll send wallet details and a quote for your order total.
+
+            {bankFlow === "preparing" && (
+              <p className="text-sm text-center text-muted-foreground mb-8">
+                Preparing a secure bank connection…
               </p>
-              <p>
-                Call{" "}
-                <a href="tel:+13132001873" className="font-bold text-primary hover:underline">
-                  (313) 200-1873
-                </a>{" "}
-                or visit our{" "}
-                <Link href="/contact" className="font-bold text-primary hover:underline" onClick={closeCart}>
-                  Contact
-                </Link>{" "}
-                page to arrange payment.
+            )}
+
+            {bankFlow === "linking" && (
+              <p className="text-sm text-center text-muted-foreground mb-8">
+                Complete the steps in the Plaid window. Your payment is authorized through Plaid Transfer
+                (Nacha-compliant).
               </p>
-            </div>
+            )}
+
+            {bankFlow === "processing" && (
+              <p className="text-sm text-center text-muted-foreground mb-8">
+                Confirming your transfer…
+              </p>
+            )}
+
+            {bankFlow === "success" && (
+              <p className="text-sm text-center text-foreground mb-8 leading-relaxed">
+                Your bank transfer was submitted. The order stays{" "}
+                <span className="font-bold">pending</span> until funds post; you&apos;ll see status in your
+                order history once processed.
+              </p>
+            )}
+
+            {bankFlow === "cancelled" && (
+              <p className="text-sm text-center text-muted-foreground mb-8 leading-relaxed">
+                You closed the bank window before finishing. No charge was made. Choose Pay by Bank again to
+                retry.
+              </p>
+            )}
+
+            {bankFlow === "error" && bankError && (
+              <p className="text-sm text-center text-destructive mb-6 leading-relaxed">{bankError}</p>
+            )}
+
             <div className="space-y-3">
-              <Button
-                type="button"
-                className="w-full h-14 brutalist-border brutalist-shadow bg-primary text-primary-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-150 text-lg font-black"
-                onClick={() => setBitcoinInfoOpen(false)}
-              >
-                GOT IT
-              </Button>
+              {(bankFlow === "success" || bankFlow === "error" || bankFlow === "cancelled") && (
+                <Button
+                  type="button"
+                  className="w-full h-14 brutalist-border brutalist-shadow bg-primary text-primary-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-150 text-lg font-black"
+                  onClick={() => {
+                    setBankModalOpen(false);
+                    setBankFlow("closed");
+                    setBankError(null);
+                    setPlaidLinkToken(null);
+                    clearPlaidCheckoutSession();
+                    if (bankFlow === "success") {
+                      closeCart();
+                    }
+                  }}
+                >
+                  {bankFlow === "success" ? "DONE" : "CLOSE"}
+                </Button>
+              )}
             </div>
           </div>
         </div>

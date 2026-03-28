@@ -4,9 +4,20 @@
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession } from "./stripe";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
+import {
+  completePlaidTransferOrder,
+  createPlaidTransferLinkSession,
+} from "./plaidTransferCheckout";
+
+const checkoutLineSchema = z.object({
+  name: z.string(),
+  priceInCents: z.number().int(),
+  quantity: z.number().int().positive(),
+  image: z.string().optional(),
+});
 
 export const checkoutRouter = router({
   createSession: publicProcedure
@@ -142,5 +153,77 @@ export const checkoutRouter = router({
         orderId,
         success: true,
       };
+    }),
+
+  /** Plaid Transfer UI — create intent + Link token (login required). */
+  createPlaidBankSession: protectedProcedure
+    .input(
+      z.object({
+        items: z.array(checkoutLineSchema),
+        deliveryMethod: z.enum(["shipping", "pickup"]).default("shipping"),
+        shippingCents: z.number().int().min(0).default(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const legal = (ctx.user.name ?? "").trim();
+      if (legal.length < 2) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message:
+            "Add your full legal name to your account profile before paying by bank (Account → profile).",
+        });
+      }
+
+      const session = await createPlaidTransferLinkSession({
+        supabaseUserId: ctx.user.id,
+        legalName: legal,
+        email: ctx.user.email,
+        items: input.items,
+        deliveryMethod: input.deliveryMethod,
+        shippingCents: input.shippingCents,
+      });
+
+      return {
+        linkToken: session.linkToken,
+        transferIntentId: session.transferIntentId,
+        amountCents: session.amountCents,
+      };
+    }),
+
+  /** After Plaid Link `onSuccess` — exchange token, verify intent, insert `bh_orders` as pending. */
+  completePlaidBankOrder: protectedProcedure
+    .input(
+      z.object({
+        publicToken: z.string(),
+        transferIntentId: z.string(),
+        items: z.array(checkoutLineSchema),
+        deliveryMethod: z.enum(["shipping", "pickup"]),
+        shippingCents: z.number().int().min(0),
+        shippingZip: z.string().optional(),
+        linkTransferStatus: z.string().optional(),
+        institutionName: z.string().optional(),
+        linkSessionId: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const shippingAddress =
+        input.deliveryMethod === "shipping" && (input.shippingZip?.trim() ?? "").length > 0
+          ? { zip: input.shippingZip!.trim() }
+          : null;
+
+      return completePlaidTransferOrder({
+        supabaseUserId: ctx.user.id,
+        customerEmail: ctx.user.email,
+        customerNameFallback: ctx.user.name,
+        publicToken: input.publicToken,
+        transferIntentId: input.transferIntentId,
+        items: input.items,
+        deliveryMethod: input.deliveryMethod,
+        shippingCents: input.shippingCents,
+        shippingAddress,
+        linkTransferStatus: input.linkTransferStatus ?? null,
+        institutionName: input.institutionName ?? null,
+        linkSessionId: input.linkSessionId ?? null,
+      });
     }),
 });

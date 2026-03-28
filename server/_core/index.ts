@@ -67,6 +67,8 @@ async function startServer() {
 
   const { registerPayPalRoutes } = await import("../paypalRoutes");
   registerPayPalRoutes(app);
+  const { registerPlaidRoutes } = await import("../plaidRoutes");
+  registerPlaidRoutes(app);
 
   const { handleAdminAnalyticsOverview, handleAdminAnalyticsTest } = await import("../adminAnalyticsHttp");
   app.get("/api/admin/analytics/overview", (req, res) => {
