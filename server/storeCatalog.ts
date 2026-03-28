@@ -2,7 +2,10 @@
  * Maps Supabase `bh_products` rows → storefront `Product` shape (incl. catalog SKU grouping).
  */
 import type { Product, ProductVariant } from "../client/src/lib/products";
-import { assertSupabaseServiceRoleForProduction } from "./_core/supabaseEnv";
+import {
+  assertSupabaseServiceRoleForProduction,
+  isSupabaseUrlExplicitlyConfigured,
+} from "./_core/supabaseEnv";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 import { BH_PRODUCT_STOREFRONT_LIST_COLUMNS } from "./storeCatalogColumns";
 
@@ -174,16 +177,35 @@ export function groupBhProductRowsToStorefrontProducts(rows: BhProductRow[]): Pr
   );
 }
 
+const STORE_LIST_PAGE = 1000;
+
 /** Slim row fetch for storefront list + grouping (smaller payload than `select *`). */
 export async function fetchStorefrontListRows(): Promise<BhProductRow[]> {
   assertSupabaseServiceRoleForProduction();
-  const { data, error } = await supabaseAdmin
-    .from("bh_products")
-    .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)
-    .order("name", { ascending: true });
+  if (process.env.NODE_ENV === "production" && !isSupabaseUrlExplicitlyConfigured()) {
+    console.warn(
+      "[storeCatalog] VITE_SUPABASE_URL or SUPABASE_URL is not set — using DEFAULT_SUPABASE_URL from shared/const. " +
+        "CLI imports use .env.local; Vercel must use the same Supabase project URL or new products will not appear."
+    );
+  }
 
-  if (error) throw new Error(error.message);
-  return (data ?? []) as BhProductRow[];
+  const rows: BhProductRow[] = [];
+  let from = 0;
+  for (;;) {
+    const to = from + STORE_LIST_PAGE - 1;
+    const { data, error } = await supabaseAdmin
+      .from("bh_products")
+      .select(BH_PRODUCT_STOREFRONT_LIST_COLUMNS)
+      .order("name", { ascending: true })
+      .range(from, to);
+
+    if (error) throw new Error(error.message);
+    const batch = (data ?? []) as BhProductRow[];
+    rows.push(...batch);
+    if (batch.length < STORE_LIST_PAGE) break;
+    from += STORE_LIST_PAGE;
+  }
+  return rows;
 }
 
 export async function fetchAllBhProductRows(): Promise<BhProductRow[]> {

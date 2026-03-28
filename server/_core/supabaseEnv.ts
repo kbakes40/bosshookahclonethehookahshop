@@ -17,6 +17,15 @@ export function resolveSupabaseServiceRoleKey(): string {
   return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ?? "";
 }
 
+/** True when the project URL is set via env (not falling back to `DEFAULT_SUPABASE_URL`). */
+export function isSupabaseUrlExplicitlyConfigured(): boolean {
+  return Boolean(
+    process.env.VITE_SUPABASE_URL?.trim() ||
+      process.env.SUPABASE_URL?.trim() ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  );
+}
+
 export function isSupabaseServiceRoleConfigured(): boolean {
   return resolveSupabaseServiceRoleKey().length > 0;
 }
