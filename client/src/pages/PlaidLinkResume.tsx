@@ -50,7 +50,17 @@ export default function PlaidLinkResume() {
           items: p.items,
           deliveryMethod: p.deliveryMethod,
           shippingCents: p.shippingCents,
-          shippingZip: p.shippingZip,
+          shippingAddress: p.shippingAddress
+            ? {
+                full_name: p.shippingAddress.full_name,
+                line1: p.shippingAddress.line1,
+                line2: p.shippingAddress.line2 ?? "",
+                city: p.shippingAddress.city,
+                state: p.shippingAddress.state,
+                zip: p.shippingAddress.zip,
+                phone: p.shippingAddress.phone ?? "",
+              }
+            : undefined,
           linkTransferStatus: meta.transfer_status,
           institutionName: meta.institution?.name,
           linkSessionId: meta.link_session_id,

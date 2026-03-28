@@ -1,5 +1,7 @@
 /** Persisted while Plaid Link runs (including OAuth return on `/plaid-oauth`). */
 
+import type { OrderShippingAddress } from "@shared/orderShippingAddress";
+
 export const PLAID_CHECKOUT_SESSION_KEY = "plaid_checkout_session_v1";
 
 export type PlaidCheckoutLineItem = {
@@ -15,7 +17,8 @@ export type PlaidCheckoutSessionPayload = {
   items: PlaidCheckoutLineItem[];
   deliveryMethod: "shipping" | "pickup";
   shippingCents: number;
-  shippingZip?: string;
+  /** Set when `deliveryMethod === "shipping"`. */
+  shippingAddress?: OrderShippingAddress;
 };
 
 export function savePlaidCheckoutSession(payload: PlaidCheckoutSessionPayload): void {

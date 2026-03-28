@@ -3,6 +3,7 @@
  * Orders are saved to Supabase (bh_orders table) instead of MySQL.
  */
 import Stripe from "stripe";
+import type { OrderShippingAddress } from "@shared/orderShippingAddress";
 import { ENV } from "./_core/env";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 
@@ -21,13 +22,18 @@ if (!ENV.stripeSecretKey) {
 export const stripe = new Stripe(
   ENV.stripeSecretKey || DEV_PLACEHOLDER_KEY,
   {
-    apiVersion: "2026-01-28.clover",
+    apiVersion: "2026-02-25.clover",
   }
 );
 
 /**
  * Create a Stripe Checkout Session for product purchase
  */
+function trimMeta(v: string, max = 450): string {
+  const t = v.trim();
+  return t.length > max ? t.slice(0, max) : t;
+}
+
 export async function createCheckoutSession(params: {
   userId: string | number;
   userEmail: string;
@@ -36,6 +42,8 @@ export async function createCheckoutSession(params: {
   deliveryMethod: "shipping" | "pickup";
   /** Added as a separate Stripe line item when greater than 0 (pickup should pass 0). */
   shippingCents?: number;
+  /** Cart-collected address; persisted via session metadata + webhook. */
+  shippingAddress?: OrderShippingAddress | null;
   successUrl: string;
   cancelUrl: string;
 }) {
@@ -49,6 +57,7 @@ export async function createCheckoutSession(params: {
     items,
     deliveryMethod,
     shippingCents = 0,
+    shippingAddress = null,
     successUrl,
     cancelUrl,
   } = params;
@@ -92,6 +101,22 @@ export async function createCheckoutSession(params: {
   }
 
   try {
+    const metadata: Record<string, string> = {
+      user_id: String(userId),
+      user_name: userName || "Guest",
+      delivery_method: deliveryMethod,
+      item_count: items.length.toString(),
+    };
+    if (deliveryMethod === "shipping" && shippingAddress) {
+      metadata.ship_fn = trimMeta(shippingAddress.full_name);
+      metadata.ship_l1 = trimMeta(shippingAddress.line1);
+      metadata.ship_l2 = shippingAddress.line2 ? trimMeta(shippingAddress.line2) : "";
+      metadata.ship_city = trimMeta(shippingAddress.city);
+      metadata.ship_st = trimMeta(shippingAddress.state);
+      metadata.ship_zip = trimMeta(shippingAddress.zip);
+      metadata.ship_ph = shippingAddress.phone ? trimMeta(shippingAddress.phone, 32) : "";
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -100,12 +125,7 @@ export async function createCheckoutSession(params: {
       cancel_url: cancelUrl,
       ...(userEmail && userEmail.includes('@') ? { customer_email: userEmail } : {}),
       client_reference_id: String(userId),
-      metadata: {
-        user_id: String(userId),
-        user_name: userName || "Guest",
-        delivery_method: deliveryMethod,
-        item_count: items.length.toString(),
-      },
+      metadata,
       allow_promotion_codes: true,
     });
 
@@ -133,7 +153,8 @@ export async function handleWebhookEvent(event: Stripe.Event) {
         const session = event.data.object as Stripe.Checkout.Session;
 
         const userId = session.metadata?.user_id || session.client_reference_id || null;
-        const deliveryMethod = (session.metadata?.delivery_method as "shipping" | "pickup") || "shipping";
+        const deliveryMethod =
+          (session.metadata?.delivery_method as "shipping" | "pickup") || "pickup";
         const customerName = session.customer_details?.name || session.metadata?.user_name || "Guest";
         const customerEmail = session.customer_details?.email || session.customer_email || null;
         const customerPhone = session.customer_details?.phone || null;
@@ -151,10 +172,61 @@ export async function handleWebhookEvent(event: Stripe.Event) {
           console.error('[Stripe Webhook] Error fetching line items:', error);
         }
 
-        // Get shipping address if available
-        let shippingAddress = null;
-        if (session.shipping_details?.address) {
-          shippingAddress = session.shipping_details.address;
+        const meta = session.metadata || {};
+        const fromMeta: OrderShippingAddress | null = (() => {
+          const line1 = typeof meta.ship_l1 === "string" ? meta.ship_l1.trim() : "";
+          if (!line1) return null;
+          const ph = typeof meta.ship_ph === "string" ? meta.ship_ph.replace(/\D/g, "") : "";
+          return {
+            full_name: typeof meta.ship_fn === "string" ? meta.ship_fn.trim() : "",
+            line1,
+            line2:
+              typeof meta.ship_l2 === "string" && meta.ship_l2.trim()
+                ? meta.ship_l2.trim()
+                : null,
+            city: typeof meta.ship_city === "string" ? meta.ship_city.trim() : "",
+            state: typeof meta.ship_st === "string" ? meta.ship_st.trim() : "",
+            zip: typeof meta.ship_zip === "string" ? meta.ship_zip.trim() : "",
+            phone: ph.length === 10 ? ph : null,
+          };
+        })();
+
+        let shippingAddress: OrderShippingAddress | Record<string, unknown> | null = fromMeta;
+
+        type ShipDet = {
+          name?: string | null;
+          address?: {
+            line1?: string | null;
+            line2?: string | null;
+            city?: string | null;
+            state?: string | null;
+            postal_code?: string | null;
+          } | null;
+        };
+        const shipDet = (session as Stripe.Checkout.Session & { shipping_details?: ShipDet | null })
+          .shipping_details;
+
+        if (!shippingAddress && shipDet?.address) {
+          const a = shipDet.address;
+          const nm = shipDet.name?.trim() || "";
+          const ph = session.customer_details?.phone
+            ? String(session.customer_details.phone).replace(/\D/g, "")
+            : "";
+          let ph10 = ph;
+          if (ph10.length === 11 && ph10.startsWith("1")) ph10 = ph10.slice(1);
+          shippingAddress = {
+            full_name: nm,
+            line1: a.line1 || "",
+            line2: a.line2 || null,
+            city: a.city || "",
+            state: a.state || "",
+            zip: a.postal_code || "",
+            phone: ph10.length === 10 ? ph10 : null,
+          };
+        }
+
+        if (deliveryMethod === "pickup") {
+          shippingAddress = null;
         }
 
         // Save order to Supabase bh_orders

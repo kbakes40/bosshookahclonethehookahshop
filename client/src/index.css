@@ -173,9 +173,24 @@
     }
   }
 
+  /**
+   * pan-y: vertical page scroll always wins when the gesture starts on the rail
+   * (transform-only marquee has no manual horizontal scroll; avoids touch “stuck” on iOS/Android).
+   * No will-change on infinite transform — avoids extra compositor sticking with document scroll.
+   */
+  .trending-marquee-clip,
+  .animate-trending-marquee {
+    touch-action: pan-y;
+  }
+
+  /* touch-action is not inherited; links/images need the same hint so drags start on a card still scroll the page */
+  .trending-marquee-clip a,
+  .trending-marquee-clip img {
+    touch-action: pan-y;
+  }
+
   .animate-trending-marquee {
     animation: trending-marquee 46s linear infinite;
-    will-change: transform;
   }
 
   @media (prefers-reduced-motion: reduce) {

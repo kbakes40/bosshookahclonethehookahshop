@@ -1,6 +1,7 @@
 /**
  * Persist PayPal-captured orders to Supabase `bh_orders` (shape aligned with Stripe webhook insert).
  */
+import type { OrderShippingAddress } from "@shared/orderShippingAddress";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 
 export type CheckoutLineItem = {
@@ -27,8 +28,17 @@ export async function insertBhOrderFromPaypalCapture(params: {
   items: CheckoutLineItem[];
   deliveryMethod: "shipping" | "pickup";
   profileEmail: string | null;
+  /** From cart when delivery is shipping (PayPal UI may not collect full street address). */
+  clientShippingAddress?: OrderShippingAddress | null;
 }): Promise<{ supabaseOrderId: string; duplicate: boolean }> {
-  const { paypalOrderId, capturePayload, items, deliveryMethod, profileEmail } = params;
+  const {
+    paypalOrderId,
+    capturePayload,
+    items,
+    deliveryMethod,
+    profileEmail,
+    clientShippingAddress,
+  } = params;
 
   const { data: existing } = await supabaseAdmin
     .from("bh_orders")
@@ -52,10 +62,14 @@ export async function insertBhOrderFromPaypalCapture(params: {
 
   const paymentId = capture?.id != null ? String(capture.id) : null;
 
-  let shippingAddress: Record<string, unknown> | null = null;
-  const ship = unit?.shipping;
-  if (ship?.address) {
-    shippingAddress = { ...(ship.address as Record<string, unknown>), name: ship.name };
+  let shippingAddress: Record<string, unknown> | OrderShippingAddress | null = null;
+  if (deliveryMethod === "shipping" && clientShippingAddress) {
+    shippingAddress = clientShippingAddress;
+  } else {
+    const ship = unit?.shipping;
+    if (ship?.address) {
+      shippingAddress = { ...(ship.address as Record<string, unknown>), name: ship.name };
+    }
   }
 
   const now = new Date().toISOString();

@@ -338,7 +338,7 @@ export const storeRouter = router({
         id: String(row.id ?? ""),
         stripeCheckoutSessionId: (row.stripe_session_id as string) ?? null,
         totalAmount: Number(row.total_amount) || 0,
-        deliveryMethod: String(row.delivery_method ?? "shipping"),
+        deliveryMethod: String(row.delivery_method ?? "pickup"),
         createdAt: String(row.created_at ?? new Date().toISOString()),
       };
     }),

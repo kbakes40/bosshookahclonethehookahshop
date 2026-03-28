@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import {
   PAYPAL_CHECKOUT_STORAGE_KEY,
-  CHECKOUT_SHIPPING_ZIP_KEY,
+  CHECKOUT_SHIPPING_ADDRESS_KEY,
   saveZelleCheckoutCartBackup,
 } from "@/lib/paypalCheckoutStorage";
 import {
@@ -23,6 +23,10 @@ import {
 } from "@/lib/plaidCheckoutSession";
 import { usePlaidLink } from "react-plaid-link";
 import { calculateShipping, orderGrandTotalUsd, FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
+import {
+  normalizeToOrderShipping,
+  shippingFormValidationMessages,
+} from "@shared/orderShippingAddress";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
 import { triggerHaptic } from "@/lib/haptics";
 
@@ -31,7 +35,7 @@ export default function CartDrawer() {
   const { formatUsd, displayTotals } = useShopCurrency();
   const [, setLocation] = useLocation();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("shipping");
+  const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("pickup");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "zelle" | "bank_transfer" | "paypal">(
     "card"
   );
@@ -42,7 +46,13 @@ export default function CartDrawer() {
   const [plaidLinkToken, setPlaidLinkToken] = useState<string | null>(null);
   const plaidPayloadRef = useRef<PlaidCheckoutSessionPayload | null>(null);
   const transferIntentIdRef = useRef<string | null>(null);
-  const [shippingZip, setShippingZip] = useState("");
+  const [shipFullName, setShipFullName] = useState("");
+  const [shipLine1, setShipLine1] = useState("");
+  const [shipLine2, setShipLine2] = useState("");
+  const [shipCity, setShipCity] = useState("");
+  const [shipState, setShipState] = useState("");
+  const [shipZip, setShipZip] = useState("");
+  const [shipPhone, setShipPhone] = useState("");
   const createCheckoutSession = trpc.checkout.createSession.useMutation();
   const createPlaidSession = trpc.checkout.createPlaidBankSession.useMutation();
   const completePlaidOrder = trpc.checkout.completePlaidBankOrder.useMutation();
@@ -62,7 +72,17 @@ export default function CartDrawer() {
           items: p.items,
           deliveryMethod: p.deliveryMethod,
           shippingCents: p.shippingCents,
-          shippingZip: p.shippingZip,
+          shippingAddress: p.shippingAddress
+            ? {
+                full_name: p.shippingAddress.full_name,
+                line1: p.shippingAddress.line1,
+                line2: p.shippingAddress.line2 ?? "",
+                city: p.shippingAddress.city,
+                state: p.shippingAddress.state,
+                zip: p.shippingAddress.zip,
+                phone: p.shippingAddress.phone ?? "",
+              }
+            : undefined,
           linkTransferStatus: meta.transfer_status,
           institutionName: meta.institution?.name,
           linkSessionId: meta.link_session_id,
@@ -111,11 +131,16 @@ export default function CartDrawer() {
           weightLb: i.weightLb,
         })),
         address:
-          deliveryMethod === "shipping" && shippingZip.trim()
-            ? { zip: shippingZip.trim() }
+          deliveryMethod === "shipping"
+            ? {
+                zip: shipZip.trim(),
+                line1: shipLine1.trim(),
+                city: shipCity.trim(),
+                state: shipState.trim(),
+              }
             : {},
       }),
-    [cartTotal, deliveryMethod, items, shippingZip]
+    [cartTotal, deliveryMethod, items, shipZip, shipLine1, shipCity, shipState]
   );
 
   const cartGrandTotal = orderGrandTotalUsd(cartTotal, shippingQuote);
@@ -284,22 +309,76 @@ export default function CartDrawer() {
             </button>
           </div>
           {deliveryMethod === "shipping" && (
-            <div className="space-y-1 pt-1">
-              <label
-                htmlFor="cart-shipping-zip"
-                className="text-[10px] font-bold uppercase text-muted-foreground"
-              >
-                ZIP code (optional — refines estimate)
-              </label>
-              <Input
-                id="cart-shipping-zip"
-                value={shippingZip}
-                onChange={e => setShippingZip(e.target.value)}
-                placeholder="e.g. 48124"
-                className="h-9 brutalist-border text-sm"
-                inputMode="numeric"
-                autoComplete="postal-code"
-              />
+            <div className="space-y-3 pt-2 border-t border-border/80">
+              <p className="text-[10px] font-bold uppercase text-muted-foreground">
+                Ship to (required for shipping orders)
+              </p>
+              <div className="space-y-2">
+                <label htmlFor="cart-ship-name" className="sr-only">
+                  Full name
+                </label>
+                <Input
+                  id="cart-ship-name"
+                  value={shipFullName}
+                  onChange={e => setShipFullName(e.target.value)}
+                  placeholder="Full name"
+                  autoComplete="shipping name"
+                  className="h-9 brutalist-border text-sm"
+                />
+                <Input
+                  id="cart-ship-line1"
+                  value={shipLine1}
+                  onChange={e => setShipLine1(e.target.value)}
+                  placeholder="Street address"
+                  autoComplete="address-line1"
+                  className="h-9 brutalist-border text-sm"
+                />
+                <Input
+                  id="cart-ship-line2"
+                  value={shipLine2}
+                  onChange={e => setShipLine2(e.target.value)}
+                  placeholder="Apt, suite (optional)"
+                  autoComplete="address-line2"
+                  className="h-9 brutalist-border text-sm"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    id="cart-ship-city"
+                    value={shipCity}
+                    onChange={e => setShipCity(e.target.value)}
+                    placeholder="City"
+                    autoComplete="address-level2"
+                    className="h-9 brutalist-border text-sm"
+                  />
+                  <Input
+                    id="cart-ship-state"
+                    value={shipState}
+                    onChange={e => setShipState(e.target.value)}
+                    placeholder="State"
+                    autoComplete="address-level1"
+                    className="h-9 brutalist-border text-sm"
+                  />
+                </div>
+                <Input
+                  id="cart-ship-zip"
+                  value={shipZip}
+                  onChange={e => setShipZip(e.target.value)}
+                  placeholder="ZIP code"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  className="h-9 brutalist-border text-sm"
+                />
+                <Input
+                  id="cart-ship-phone"
+                  type="tel"
+                  value={shipPhone}
+                  onChange={e => setShipPhone(e.target.value)}
+                  placeholder="Phone (optional)"
+                  inputMode="tel"
+                  autoComplete="tel-national"
+                  className="h-9 brutalist-border text-sm"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -395,13 +474,47 @@ export default function CartDrawer() {
           className="w-full h-14 brutalist-border brutalist-shadow bg-primary text-primary-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-150 text-lg font-black"
           disabled={isCheckingOut}
           onClick={async () => {
+            const shipFields = {
+              fullName: shipFullName,
+              line1: shipLine1,
+              line2: shipLine2,
+              city: shipCity,
+              state: shipState,
+              zip: shipZip,
+              phone: shipPhone,
+            };
+            if (deliveryMethod === "shipping") {
+              const msgs = shippingFormValidationMessages(shipFields);
+              if (msgs.length) {
+                toast.error(msgs[0]);
+                triggerHaptic("error");
+                return;
+              }
+            }
+            const orderShipping =
+              deliveryMethod === "shipping" ? normalizeToOrderShipping(shipFields) : null;
+            const shippingAddressApi = orderShipping
+              ? {
+                  full_name: orderShipping.full_name,
+                  line1: orderShipping.line1,
+                  line2: orderShipping.line2 ?? "",
+                  city: orderShipping.city,
+                  state: orderShipping.state,
+                  zip: orderShipping.zip,
+                  phone: orderShipping.phone ?? "",
+                }
+              : undefined;
+
             setIsCheckingOut(true);
             try {
               if (paymentMethod === "zelle") {
-                if (deliveryMethod === "shipping") {
-                  sessionStorage.setItem(CHECKOUT_SHIPPING_ZIP_KEY, shippingZip.trim());
+                if (deliveryMethod === "shipping" && orderShipping) {
+                  sessionStorage.setItem(
+                    CHECKOUT_SHIPPING_ADDRESS_KEY,
+                    JSON.stringify(orderShipping)
+                  );
                 } else {
-                  sessionStorage.removeItem(CHECKOUT_SHIPPING_ZIP_KEY);
+                  sessionStorage.removeItem(CHECKOUT_SHIPPING_ADDRESS_KEY);
                 }
                 saveZelleCheckoutCartBackup(items);
                 triggerHaptic("confirm");
@@ -446,7 +559,7 @@ export default function CartDrawer() {
                     items: checkoutItems,
                     deliveryMethod,
                     shippingCents: Math.round(shippingQuote.shippingAmount * 100),
-                    shippingZip: deliveryMethod === "shipping" ? shippingZip.trim() : undefined,
+                    shippingAddress: orderShipping ?? undefined,
                   };
                   plaidPayloadRef.current = payload;
                   savePlaidCheckoutSession(payload);
@@ -491,6 +604,7 @@ export default function CartDrawer() {
                     items: checkoutItems,
                     deliveryMethod,
                     shippingCents: Math.round(shippingQuote.shippingAmount * 100),
+                    shippingAddress: orderShipping ?? undefined,
                   })
                 );
 
@@ -542,6 +656,7 @@ export default function CartDrawer() {
                   items: checkoutItems,
                   deliveryMethod,
                   shippingCents: Math.round(shippingQuote.shippingAmount * 100),
+                  shippingAddress: shippingAddressApi,
                 });
 
                 if (stripeSession.url) {

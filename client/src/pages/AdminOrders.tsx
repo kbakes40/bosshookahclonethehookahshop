@@ -30,6 +30,51 @@ function payBadge(status: string) {
   return "bg-zinc-800 text-zinc-400 border border-zinc-700";
 }
 
+/** Normalize `bh_orders.shipping_address` jsonb (our shape or Stripe/PayPal-flavored). */
+function adminShippingLines(raw: unknown): string[] {
+  if (!raw || typeof raw !== "object") return [];
+  const o = raw as Record<string, unknown>;
+  if (typeof o.full_name === "string" && o.full_name.trim()) {
+    const lines: string[] = [o.full_name.trim()];
+    if (typeof o.line1 === "string" && o.line1.trim()) lines.push(o.line1.trim());
+    if (typeof o.line2 === "string" && o.line2.trim()) lines.push(o.line2.trim());
+    const city = typeof o.city === "string" ? o.city : "";
+    const st = typeof o.state === "string" ? o.state : "";
+    const zip = typeof o.zip === "string" ? o.zip : "";
+    if (city || st || zip) lines.push([city, st, zip].filter(Boolean).join(", "));
+    if (typeof o.phone === "string" && o.phone.trim()) lines.push(o.phone.trim());
+    return lines;
+  }
+  const line1 = typeof o.line1 === "string" ? o.line1 : "";
+  const postal =
+    typeof o.postal_code === "string"
+      ? o.postal_code
+      : typeof o.zip === "string"
+        ? o.zip
+        : "";
+  if (!line1 && !postal) return [];
+  const out: string[] = [];
+  if (line1) out.push(line1);
+  if (typeof o.line2 === "string" && o.line2.trim()) out.push(o.line2.trim());
+  const c = typeof o.city === "string" ? o.city : "";
+  const s = typeof o.state === "string" ? o.state : "";
+  if (c || s || postal) out.push([c, s, postal].filter(Boolean).join(", "));
+  return out;
+}
+
+function paymentMethodLabel(method: string): string {
+  switch (method) {
+    case "zelle":
+      return "Zelle";
+    case "paypal":
+      return "PayPal";
+    case "bank_transfer":
+      return "Pay by Bank";
+    default:
+      return "Card";
+  }
+}
+
 export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "paid" | "failed" | "refunded">("all");
   const [fulfillmentFilter, setFulfillmentFilter] = useState<
@@ -180,6 +225,9 @@ export default function AdminOrders() {
                       Delivery
                     </th>
                     <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-wide text-zinc-500 font-medium">
+                      Ship to
+                    </th>
+                    <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-wide text-zinc-500 font-medium">
                       Actions
                     </th>
                   </tr>
@@ -211,10 +259,14 @@ export default function AdminOrders() {
                             className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${
                               order.paymentMethod === "zelle"
                                 ? "bg-indigo-950/50 text-indigo-200 border-indigo-900/50"
-                                : "bg-zinc-800 text-zinc-300 border-zinc-700"
+                                : order.paymentMethod === "paypal"
+                                  ? "bg-sky-950/45 text-sky-200 border-sky-900/45"
+                                  : order.paymentMethod === "bank_transfer"
+                                    ? "bg-emerald-950/45 text-emerald-200 border-emerald-900/45"
+                                    : "bg-zinc-800 text-zinc-300 border-zinc-700"
                             }`}
                           >
-                            {order.paymentMethod === "zelle" ? "Zelle" : "Card"}
+                            {paymentMethodLabel(order.paymentMethod)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -248,6 +300,25 @@ export default function AdminOrders() {
                           >
                             {order.deliveryMethod === "pickup" ? "Pickup" : "Shipping"}
                           </span>
+                        </td>
+                        <td className="px-4 py-3 align-top max-w-[200px]">
+                          {order.deliveryMethod === "pickup" ? (
+                            <span className="text-zinc-600 text-[11px]">—</span>
+                          ) : (
+                            (() => {
+                              const lines = adminShippingLines(order.shippingAddress);
+                              if (!lines.length) {
+                                return <span className="text-amber-200/80 text-[10px]">No address</span>;
+                              }
+                              return (
+                                <div className="text-[11px] text-zinc-400 space-y-0.5 leading-snug">
+                                  {lines.map((ln, i) => (
+                                    <div key={i}>{ln}</div>
+                                  ))}
+                                </div>
+                              );
+                            })()
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-1.5">
@@ -283,7 +354,7 @@ export default function AdminOrders() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-4 py-14 text-center text-zinc-500">
+                      <td colSpan={10} className="px-4 py-14 text-center text-zinc-500">
                         No orders match these filters.
                       </td>
                     </tr>

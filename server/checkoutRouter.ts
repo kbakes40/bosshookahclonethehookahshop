@@ -11,6 +11,10 @@ import {
   completePlaidTransferOrder,
   createPlaidTransferLinkSession,
 } from "./plaidTransferCheckout";
+import {
+  normalizeToOrderShipping,
+  type OrderShippingAddress,
+} from "@shared/orderShippingAddress";
 
 const checkoutLineSchema = z.object({
   name: z.string(),
@@ -19,22 +23,55 @@ const checkoutLineSchema = z.object({
   image: z.string().optional(),
 });
 
+const orderShippingPayloadSchema = z
+  .object({
+    full_name: z.string().min(1),
+    line1: z.string().min(1),
+    line2: z.string().optional(),
+    city: z.string().min(1),
+    state: z.string().min(1),
+    zip: z.string().min(3),
+    phone: z.string().optional(),
+  })
+  .transform((v) =>
+    normalizeToOrderShipping({
+      fullName: v.full_name,
+      line1: v.line1,
+      line2: v.line2 ?? "",
+      city: v.city,
+      state: v.state,
+      zip: v.zip,
+      phone: v.phone ?? "",
+    })
+  );
+
 export const checkoutRouter = router({
   createSession: publicProcedure
     .input(
-      z.object({
-        items: z.array(
-          z.object({
-            name: z.string(),
-            priceInCents: z.number(),
-            quantity: z.number(),
-            image: z.string().optional(),
-          })
-        ),
-        deliveryMethod: z.enum(["shipping", "pickup"]).default("shipping"),
-        /** Shipping line item in cents (must match client `calculateShipping`). */
-        shippingCents: z.number().int().min(0).optional().default(0),
-      })
+      z
+        .object({
+          items: z.array(
+            z.object({
+              name: z.string(),
+              priceInCents: z.number(),
+              quantity: z.number(),
+              image: z.string().optional(),
+            })
+          ),
+          deliveryMethod: z.enum(["shipping", "pickup"]).default("pickup"),
+          /** Shipping line item in cents (must match client `calculateShipping`). */
+          shippingCents: z.number().int().min(0).optional().default(0),
+          shippingAddress: orderShippingPayloadSchema.optional(),
+        })
+        .superRefine((val, ctx) => {
+          if (val.deliveryMethod === "shipping" && !val.shippingAddress) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Shipping address is required when shipping is selected.",
+              path: ["shippingAddress"],
+            });
+          }
+        })
     )
     .mutation(async ({ ctx, input }) => {
       try {
@@ -56,6 +93,8 @@ export const checkoutRouter = router({
           items: input.items,
           deliveryMethod: input.deliveryMethod,
           shippingCents: input.shippingCents,
+          shippingAddress:
+            input.deliveryMethod === "shipping" ? input.shippingAddress ?? null : null,
           successUrl: `${origin}/checkout/success`,
           cancelUrl: `${origin}/checkout/cancel`,
         });
@@ -76,32 +115,43 @@ export const checkoutRouter = router({
 
   createZelleOrder: publicProcedure
     .input(
-      z.object({
-        items: z.array(
-          z.object({
-            name: z.string(),
-            priceInCents: z.coerce.number().int(),
-            quantity: z.coerce.number().int().positive(),
-            image: z.string().optional(),
-          })
-        ),
-        deliveryMethod: z
-          .unknown()
-          .transform(v => (v === "pickup" ? "pickup" : "shipping"))
-          .pipe(z.enum(["shipping", "pickup"])),
-        customerName: z.string().min(1),
-        /** 10 US digits (avoids dashed formats that fail common DB CHECK constraints). */
-        customerPhone: z
-          .string()
-          .transform(s => {
-            let d = s.replace(/\D/g, "");
-            if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
-            return d;
-          })
-          .pipe(z.string().regex(/^\d{10}$/, "Phone must be 10 digits")),
-        /** Cart total in cents (matches Stripe `amount_total`) */
-        totalAmount: z.coerce.number().int().nonnegative(),
-      })
+      z
+        .object({
+          items: z.array(
+            z.object({
+              name: z.string(),
+              priceInCents: z.coerce.number().int(),
+              quantity: z.coerce.number().int().positive(),
+              image: z.string().optional(),
+            })
+          ),
+          deliveryMethod: z
+            .unknown()
+            .transform(v => (v === "pickup" ? "pickup" : "shipping"))
+            .pipe(z.enum(["shipping", "pickup"])),
+          customerName: z.string().min(1),
+          /** 10 US digits (avoids dashed formats that fail common DB CHECK constraints). */
+          customerPhone: z
+            .string()
+            .transform(s => {
+              let d = s.replace(/\D/g, "");
+              if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+              return d;
+            })
+            .pipe(z.string().regex(/^\d{10}$/, "Phone must be 10 digits")),
+          /** Cart total in cents (matches Stripe `amount_total`) */
+          totalAmount: z.coerce.number().int().nonnegative(),
+          shippingAddress: orderShippingPayloadSchema.optional(),
+        })
+        .superRefine((val, ctx) => {
+          if (val.deliveryMethod === "shipping" && !val.shippingAddress) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Shipping address is required when shipping is selected.",
+              path: ["shippingAddress"],
+            });
+          }
+        })
     )
     .mutation(async ({ ctx, input }) => {
       const now = new Date().toISOString();
@@ -115,6 +165,9 @@ export const checkoutRouter = router({
         totalAmount: input.totalAmount,
         itemCount: input.items.length,
       });
+
+      const shippingRow: OrderShippingAddress | null =
+        input.deliveryMethod === "shipping" ? input.shippingAddress ?? null : null;
 
       const { data: inserted, error } = await supabaseAdmin
         .from("bh_orders")
@@ -131,7 +184,7 @@ export const checkoutRouter = router({
           payment_method: "zelle",
           delivery_method: input.deliveryMethod,
           items: input.items,
-          shipping_address: null,
+          shipping_address: shippingRow,
           created_at: now,
           updated_at: now,
         })
@@ -160,7 +213,7 @@ export const checkoutRouter = router({
     .input(
       z.object({
         items: z.array(checkoutLineSchema),
-        deliveryMethod: z.enum(["shipping", "pickup"]).default("shipping"),
+        deliveryMethod: z.enum(["shipping", "pickup"]).default("pickup"),
         shippingCents: z.number().int().min(0).default(0),
       })
     )
@@ -193,23 +246,31 @@ export const checkoutRouter = router({
   /** After Plaid Link `onSuccess` — exchange token, verify intent, insert `bh_orders` as pending. */
   completePlaidBankOrder: protectedProcedure
     .input(
-      z.object({
-        publicToken: z.string(),
-        transferIntentId: z.string(),
-        items: z.array(checkoutLineSchema),
-        deliveryMethod: z.enum(["shipping", "pickup"]),
-        shippingCents: z.number().int().min(0),
-        shippingZip: z.string().optional(),
-        linkTransferStatus: z.string().optional(),
-        institutionName: z.string().optional(),
-        linkSessionId: z.string().optional(),
-      })
+      z
+        .object({
+          publicToken: z.string(),
+          transferIntentId: z.string(),
+          items: z.array(checkoutLineSchema),
+          deliveryMethod: z.enum(["shipping", "pickup"]),
+          shippingCents: z.number().int().min(0),
+          shippingAddress: orderShippingPayloadSchema.optional(),
+          linkTransferStatus: z.string().optional(),
+          institutionName: z.string().optional(),
+          linkSessionId: z.string().optional(),
+        })
+        .superRefine((val, ctx) => {
+          if (val.deliveryMethod === "shipping" && !val.shippingAddress) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Shipping address is required when shipping is selected.",
+              path: ["shippingAddress"],
+            });
+          }
+        })
     )
     .mutation(async ({ ctx, input }) => {
-      const shippingAddress =
-        input.deliveryMethod === "shipping" && (input.shippingZip?.trim() ?? "").length > 0
-          ? { zip: input.shippingZip!.trim() }
-          : null;
+      const shippingAddress: OrderShippingAddress | null =
+        input.deliveryMethod === "shipping" ? input.shippingAddress ?? null : null;
 
       return completePlaidTransferOrder({
         supabaseUserId: ctx.user.id,

@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 import { useCart } from "@/contexts/CartContext";
 import { PAYPAL_CHECKOUT_STORAGE_KEY } from "@/lib/paypalCheckoutStorage";
+import type { OrderShippingAddress } from "@shared/orderShippingAddress";
 
 type StoredPayload = {
   items: Array<{
@@ -16,6 +17,7 @@ type StoredPayload = {
   deliveryMethod: "shipping" | "pickup";
   /** Included in PayPal order total from cart (capture amount includes shipping). */
   shippingCents?: number;
+  shippingAddress?: OrderShippingAddress;
 };
 
 export default function CheckoutPayPalReturn() {
@@ -51,6 +53,11 @@ export default function CheckoutPayPalReturn() {
         return;
       }
 
+      if (payload.deliveryMethod === "shipping" && !payload.shippingAddress?.line1) {
+        setMsg("Shipping address missing. Please start checkout again from your cart.");
+        return;
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -71,6 +78,8 @@ export default function CheckoutPayPalReturn() {
             orderID,
             items: payload.items,
             deliveryMethod: payload.deliveryMethod,
+            shippingAddress:
+              payload.deliveryMethod === "shipping" ? payload.shippingAddress : undefined,
           }),
           credentials: "include",
         });

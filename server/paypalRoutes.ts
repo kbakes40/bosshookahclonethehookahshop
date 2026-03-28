@@ -2,9 +2,27 @@
  * Express handlers for PayPal checkout (mounted under /api/paypal/*).
  */
 import type { Express, Request, Response } from "express";
+import type { OrderShippingAddress } from "@shared/orderShippingAddress";
 import { verifySupabaseToken } from "./_core/supabaseAdmin";
 import { paypalCaptureOrder, paypalCreateOrder } from "./paypalRest";
 import { insertBhOrderFromPaypalCapture, type CheckoutLineItem } from "./paypalOrderDb";
+
+function isOrderShippingAddress(x: unknown): x is OrderShippingAddress {
+  if (!x || typeof x !== "object") return false;
+  const o = x as Record<string, unknown>;
+  return (
+    typeof o.full_name === "string" &&
+    o.full_name.trim().length > 0 &&
+    typeof o.line1 === "string" &&
+    o.line1.trim().length > 0 &&
+    typeof o.city === "string" &&
+    o.city.trim().length > 0 &&
+    typeof o.state === "string" &&
+    o.state.trim().length > 0 &&
+    typeof o.zip === "string" &&
+    o.zip.trim().length >= 3
+  );
+}
 
 function extractBearer(req: Request): string | null {
   const h = req.headers.authorization;
@@ -147,6 +165,30 @@ export function registerPayPalRoutes(app: Express): void {
       }
       const items = rawItems as CheckoutLineItem[];
 
+      let clientShipping: OrderShippingAddress | null = null;
+      if (deliveryMethod === "shipping") {
+        const addr = req.body?.shippingAddress;
+        if (!isOrderShippingAddress(addr)) {
+          return res.status(400).json({
+            error: "Bad Request",
+            message:
+              "shippingAddress with full_name, line1, city, state, zip is required when deliveryMethod is shipping",
+          });
+        }
+        let ph = typeof addr.phone === "string" ? addr.phone.replace(/\D/g, "") : "";
+        if (ph.length === 11 && ph.startsWith("1")) ph = ph.slice(1);
+        clientShipping = {
+          full_name: addr.full_name.trim(),
+          line1: addr.line1.trim(),
+          line2:
+            typeof addr.line2 === "string" && addr.line2.trim() ? addr.line2.trim() : null,
+          city: addr.city.trim(),
+          state: addr.state.trim(),
+          zip: addr.zip.trim(),
+          phone: ph.length === 10 ? ph : null,
+        };
+      }
+
       const capturePayload = await paypalCaptureOrder(orderID);
 
       const { supabaseOrderId, duplicate } = await insertBhOrderFromPaypalCapture({
@@ -155,6 +197,7 @@ export function registerPayPalRoutes(app: Express): void {
         items,
         deliveryMethod,
         profileEmail: user.email,
+        clientShippingAddress: clientShipping,
       });
 
       return res.status(200).json({

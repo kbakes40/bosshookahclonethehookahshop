@@ -24,6 +24,7 @@ export function mapOrderRow(o: Record<string, unknown>) {
     items: o.items,
     stripeSessionId: (o.stripe_session_id as string) ?? null,
     paymentMetadata: (o.payment_metadata as Record<string, unknown> | null | undefined) ?? null,
+    shippingAddress: o.shipping_address ?? null,
   };
 }
 

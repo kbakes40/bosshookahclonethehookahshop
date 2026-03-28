@@ -11,8 +11,10 @@ import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { Copy, CheckCircle2, MapPin, Phone } from "lucide-react";
 import { calculateShipping, orderGrandTotalUsd } from "@shared/shipping";
+import { orderShippingToQuoteInput } from "@shared/orderShippingAddress";
+import type { OrderShippingAddress } from "@shared/orderShippingAddress";
 import {
-  CHECKOUT_SHIPPING_ZIP_KEY,
+  CHECKOUT_SHIPPING_ADDRESS_KEY,
   ZELLE_CHECKOUT_CART_KEY,
   clearZelleCheckoutCartBackup,
 } from "@/lib/paypalCheckoutStorage";
@@ -66,8 +68,18 @@ export default function ZelleCheckout() {
   const deliveryMethod: "shipping" | "pickup" =
     deliveryParam === "pickup" ? "pickup" : "shipping";
 
-  const shippingZip =
-    typeof window !== "undefined" ? sessionStorage.getItem(CHECKOUT_SHIPPING_ZIP_KEY) ?? "" : "";
+  const storedShipping = useMemo((): OrderShippingAddress | null => {
+    if (typeof window === "undefined" || deliveryMethod !== "shipping") return null;
+    try {
+      const raw = sessionStorage.getItem(CHECKOUT_SHIPPING_ADDRESS_KEY);
+      if (!raw) return null;
+      const o = JSON.parse(raw) as OrderShippingAddress;
+      if (!o?.line1?.trim() || !o?.zip?.trim()) return null;
+      return o;
+    } catch {
+      return null;
+    }
+  }, [deliveryMethod, items.length]);
 
   const shippingQuote = useMemo(
     () =>
@@ -79,11 +91,11 @@ export default function ZelleCheckout() {
           weightLb: i.weightLb,
         })),
         address:
-          deliveryMethod === "shipping" && shippingZip.trim()
-            ? { zip: shippingZip.trim() }
+          deliveryMethod === "shipping" && storedShipping
+            ? orderShippingToQuoteInput(storedShipping)
             : {},
       }),
-    [cartTotal, deliveryMethod, items, shippingZip]
+    [cartTotal, deliveryMethod, items, storedShipping]
   );
 
   const orderGrandTotal = orderGrandTotalUsd(cartTotal, shippingQuote);
@@ -107,6 +119,15 @@ export default function ZelleCheckout() {
     }
     setLocation("/");
   }, [items.length, replaceCart, setLocation]);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    if (deliveryMethod !== "shipping") return;
+    if (!storedShipping) {
+      toast.error("Shipping address missing. Open your cart and complete shipping fields again.");
+      setLocation("/");
+    }
+  }, [items.length, deliveryMethod, storedShipping, setLocation]);
 
   const handleSubmitOrder = async () => {
     if (!customerName.trim()) {
@@ -134,6 +155,11 @@ export default function ZelleCheckout() {
       return;
     }
 
+    if (deliveryMethod === "shipping" && !storedShipping) {
+      toast.error("Shipping address missing. Return to the cart and try again.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const orderItems = items.map(item => ({
@@ -150,6 +176,18 @@ export default function ZelleCheckout() {
         customerName: customerName.trim(),
         customerPhone: customerPhoneForApi,
         totalAmount: totalCents,
+        shippingAddress:
+          deliveryMethod === "shipping" && storedShipping
+            ? {
+                full_name: storedShipping.full_name,
+                line1: storedShipping.line1,
+                line2: storedShipping.line2 ?? "",
+                city: storedShipping.city,
+                state: storedShipping.state,
+                zip: storedShipping.zip,
+                phone: storedShipping.phone ?? "",
+              }
+            : undefined,
       });
 
       setOrderId(result.orderId);
@@ -292,6 +330,32 @@ export default function ZelleCheckout() {
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 flex-shrink-0" />
                       <span>{storeSettings.data.phone}</span>
+                    </div>
+                  </div>
+                )}
+                {deliveryMethod === "shipping" && storedShipping && (
+                  <div className="text-sm space-y-1 text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <span>
+                        {storedShipping.full_name}
+                        <br />
+                        {storedShipping.line1}
+                        {storedShipping.line2 ? (
+                          <>
+                            <br />
+                            {storedShipping.line2}
+                          </>
+                        ) : null}
+                        <br />
+                        {storedShipping.city}, {storedShipping.state} {storedShipping.zip}
+                        {storedShipping.phone ? (
+                          <>
+                            <br />
+                            {storedShipping.phone}
+                          </>
+                        ) : null}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -470,6 +534,32 @@ export default function ZelleCheckout() {
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 flex-shrink-0" />
                     <span>{storeSettings.data.phone}</span>
+                  </div>
+                </div>
+              )}
+              {deliveryMethod === "shipping" && storedShipping && (
+                <div className="text-sm space-y-1 text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span>
+                      {storedShipping.full_name}
+                      <br />
+                      {storedShipping.line1}
+                      {storedShipping.line2 ? (
+                        <>
+                          <br />
+                          {storedShipping.line2}
+                        </>
+                      ) : null}
+                      <br />
+                      {storedShipping.city}, {storedShipping.state} {storedShipping.zip}
+                      {storedShipping.phone ? (
+                        <>
+                          <br />
+                          {storedShipping.phone}
+                        </>
+                      ) : null}
+                    </span>
                   </div>
                 </div>
               )}
