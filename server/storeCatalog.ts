@@ -71,14 +71,21 @@ function applyCatalogStorefrontOverride(product: Product, catalogKey: string): P
 
 function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
   const variantRows = rows.filter(r => /^catalog:[^:]+:.+/.test(String(r.sku ?? "")));
+  const variantRowsSorted = [...variantRows].sort((a, b) =>
+    extractVariantLabel(String(a.name ?? "")).localeCompare(
+      extractVariantLabel(String(b.name ?? "")),
+      undefined,
+      { sensitivity: "base" }
+    )
+  );
   const baseRows = rows.filter(r => String(r.sku ?? "") === `catalog:${key}`);
   const base = baseRows[0];
   const first = rows[0];
   const name = base
     ? String(base.name ?? "")
-    : baseTitleFromName(String(variantRows[0]?.name ?? first?.name ?? ""));
+    : baseTitleFromName(String(variantRowsSorted[0]?.name ?? first?.name ?? ""));
 
-  const variants: ProductVariant[] = variantRows.map(r => {
+  const variants: ProductVariant[] = variantRowsSorted.map(r => {
     const sku = String(r.sku ?? "");
     const m = /^catalog:[^:]+:(.+)$/.exec(sku);
     const vid = m ? m[1] : "";
@@ -94,10 +101,8 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
     };
   });
 
-  variants.sort((a, b) => a.name.localeCompare(b.name));
-
-  const src = base || variantRows[0] || first;
-  const descRow = [base, ...variantRows].find(r => r?.description);
+  const src = base || variantRowsSorted[0] || first;
+  const descRow = [base, ...variantRowsSorted].find(r => r?.description);
   const wLb = weightLbFromRows(rows);
   const createdAt = latestCreatedIso(rows);
 
@@ -114,7 +119,14 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
       salePrice: src.sale_price != null ? Number(src.sale_price) : undefined,
       category: String(src.category ?? ""),
       image: String(
-        (base?.image_url ?? variantRows[0]?.image_url ?? src.image_url ?? "") || ""
+        (() => {
+          if (base?.image_url) return base.image_url;
+          for (const r of variantRowsSorted) {
+            const u = String(r.image_url ?? "").trim();
+            if (u) return u;
+          }
+          return src.image_url ?? "";
+        })()
       ),
       badge: src.badge ? String(src.badge) : undefined,
       inStock: rows.some(r => r.in_stock !== false),
