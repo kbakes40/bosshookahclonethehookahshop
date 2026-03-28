@@ -27,7 +27,7 @@ const defaultStoreSettings = () =>
     pickup_instructions:
       "Please bring your order confirmation and a valid ID when picking up your order. Call us at (313) 406-6589 if you have any questions.",
     zelle_email: null,
-    zelle_phone: null,
+    zelle_phone: "313-200-1873",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   })!;

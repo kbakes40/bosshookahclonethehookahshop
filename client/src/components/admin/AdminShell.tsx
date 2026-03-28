@@ -1,5 +1,5 @@
 /**
- * The Hookah Shop admin layout — dark Shopify-inspired shell, restrained accent (lime only for key actions).
+ * The Hookah Shop admin layout — dark Shopify-inspired shell, restrained accent (blue for key actions).
  */
 import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
@@ -78,7 +78,7 @@ export function AdminShell({ title, subtitle, children, headerTrailing }: AdminS
           <Link href="/admin/dashboard">
             <a className="flex items-center gap-3 group">
               <div className="h-9 w-9 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center">
-                <Store className="h-4 w-4 text-[#a3e635] group-hover:text-[#bef264] transition-colors" />
+                <Store className="h-4 w-4 text-[#60A5FA] group-hover:text-[#93C5FA] transition-colors" />
               </div>
               <div className="min-w-0">
                 <p className="font-semibold text-zinc-100 truncate leading-tight">The Hookah Shop</p>
@@ -99,7 +99,7 @@ export function AdminShell({ title, subtitle, children, headerTrailing }: AdminS
                 <a
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                     active
-                      ? "bg-[#1a1a1c] text-[#bef264] border border-zinc-700/60"
+                      ? "bg-[#1a1a1c] text-[#93C5FA] border border-zinc-700/60"
                       : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/80 border border-transparent"
                   }`}
                 >

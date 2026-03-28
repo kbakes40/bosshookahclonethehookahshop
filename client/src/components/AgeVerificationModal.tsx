@@ -93,7 +93,7 @@ export default function AgeVerificationModal() {
           <div className="space-y-4">
             <Button
               onClick={handleYes}
-              className="w-full brutalist-border bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-lg py-6"
+              className="w-full brutalist-border bg-blue-600 text-white hover:bg-blue-700 font-bold text-lg py-6"
             >
               YES
             </Button>

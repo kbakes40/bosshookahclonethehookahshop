@@ -320,7 +320,7 @@ export default function AdminInventory() {
       </Button>
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="bg-[#3f6212] hover:bg-[#4d7c0f] text-[#ecfccb] gap-1.5">
+          <Button size="sm" className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-[#DBEAFE] gap-1.5">
             <Plus className="w-4 h-4" />
             Add item
           </Button>
@@ -432,7 +432,7 @@ export default function AdminInventory() {
             <Button variant="outline" className="border-zinc-700" onClick={() => setAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button className="bg-[#3f6212] hover:bg-[#4d7c0f] text-[#ecfccb]" onClick={handleAddItem}>
+            <Button className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-[#DBEAFE]" onClick={handleAddItem}>
               Add
             </Button>
           </div>
@@ -487,7 +487,7 @@ export default function AdminInventory() {
           and confirm <code className="text-zinc-400">SUPABASE_SERVICE_ROLE_KEY</code> on the server.
         </p>
         {costLookupStatus?.configured && costLookupStatus.sites.length > 0 && (
-          <p className="text-[11px] text-emerald-400/90">
+          <p className="text-[11px] text-blue-400/90">
             5star fallback hosts:{" "}
             <code className="text-zinc-300">{costLookupStatus.sites.join(", ")}</code>.
           </p>
@@ -495,7 +495,7 @@ export default function AdminInventory() {
         {costLookupStatus?.configured &&
           costLookupStatus.sites.length === 0 &&
           (costLookupStatus.serpApiConfigured || costLookupStatus.barcodeLookupConfigured) && (
-            <p className="text-[11px] text-emerald-400/90">
+            <p className="text-[11px] text-blue-400/90">
               Wholesale lookup via SerpApi/Barcode only — add{" "}
               <code className="text-zinc-300">COST_LOOKUP_SITES</code> for 5starhookah fallback.
             </p>
@@ -622,7 +622,7 @@ export default function AdminInventory() {
                                   })
                                 }
                                 className={`tabular-nums text-left ${
-                                  item.cost != null ? "text-[#bef264]" : "text-zinc-500"
+                                  item.cost != null ? "text-[#93C5FA]" : "text-zinc-500"
                                 } hover:text-zinc-200 transition-colors`}
                               >
                                 {item.cost != null ? `$${item.cost.toFixed(2)}` : "—"}
@@ -692,7 +692,7 @@ export default function AdminInventory() {
                                     (wholesaleBusyId === item.id && wholesaleLookup.isPending)
                                   }
                                   onClick={() => runFindCost(item.id, false)}
-                                  className="text-[11px] text-left text-[#a3e635]/90 hover:text-[#bef264] disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                                  className="text-[11px] text-left text-[#60A5FA]/90 hover:text-[#93C5FA] disabled:opacity-40 disabled:pointer-events-none transition-colors"
                                 >
                                   {wholesaleBusyId === item.id && wholesaleLookup.isPending
                                     ? "Searching…"
@@ -790,7 +790,7 @@ export default function AdminInventory() {
             <div className="space-y-3 text-sm pt-1">
               <p className="text-zinc-200 font-medium">{reviewItem.productName}</p>
               <p className="text-zinc-500 text-xs">{reviewItem.brand}</p>
-              <p className="tabular-nums text-[#bef264] text-lg">
+              <p className="tabular-nums text-[#93C5FA] text-lg">
                 ${reviewItem.costSuggestedUsd != null ? reviewItem.costSuggestedUsd.toFixed(2) : "—"} ·{" "}
                 <span className="text-zinc-400 text-sm">{reviewItem.costMatchConfidence ?? ""}</span>
               </p>
@@ -799,7 +799,7 @@ export default function AdminInventory() {
                   href={reviewItem.costSourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-[#a3e635]/90 hover:text-[#bef264]"
+                  className="inline-flex items-center gap-1.5 text-xs text-[#60A5FA]/90 hover:text-[#93C5FA]"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   View source
@@ -818,7 +818,7 @@ export default function AdminInventory() {
                 <Button
                   type="button"
                   size="sm"
-                  className="bg-[#3f6212] hover:bg-[#4d7c0f] text-[#ecfccb]"
+                  className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-[#DBEAFE]"
                   disabled={applySuggested.isPending || reviewItem.costSuggestedUsd == null}
                   onClick={() => applySuggested.mutate({ productId: reviewItem.id })}
                 >

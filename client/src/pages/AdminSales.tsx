@@ -122,16 +122,16 @@ function downloadCsv(filename: string, rows: string[][]) {
   URL.revokeObjectURL(a.href);
 }
 
-/** Donut palette: lime accent family + neutral zinc (on-brand, not rainbow). */
+/** Donut palette: blue accent family + neutral zinc (on-brand, not rainbow). */
 const BRAND_SLICE_COLORS = [
-  "rgba(163, 230, 53, 0.92)",
-  "rgba(132, 204, 22, 0.88)",
-  "rgba(101, 163, 13, 0.85)",
+  "rgba(96, 165, 250, 0.92)",
+  "rgba(59, 130, 246, 0.88)",
+  "rgba(37, 99, 235, 0.85)",
   "#a1a1aa",
   "#71717a",
   "#52525b",
   "#3f3f46",
-  "#d9f99d",
+  "#93C5FA",
 ] as const;
 
 type SortKey = "profit" | "revenue" | "units" | "margin" | "cost";
@@ -315,7 +315,7 @@ export default function AdminSales() {
               className={cn(
                 "h-8 shrink-0 rounded-md px-2.5 text-[11px] font-medium",
                 preset === k
-                  ? "bg-[#1a2312] text-[#bef264] border border-[#3f6212]/40 hover:bg-[#1f2a16]"
+                  ? "bg-[#172554] text-[#93C5FA] border border-[#1E40AF]/40 hover:bg-[#1E3A8A]"
                   : `text-zinc-400 border border-transparent ${salesGlassHoverInteractive}`
               )}
             >
@@ -370,7 +370,7 @@ export default function AdminSales() {
         <Button
           type="button"
           size="sm"
-          className="h-9 min-h-9 bg-[#3f6212] text-[#ecfccb] border border-[#65a30d]/50 text-xs px-3 transition-[background-color,box-shadow,color] duration-[180ms] ease-in-out hover:!bg-[#4d7c0f] hover:!shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] focus-visible:!ring-2 focus-visible:!ring-[#65a30d]/40"
+          className="h-9 min-h-9 bg-[#1E40AF] text-[#DBEAFE] border border-[#2563EB]/50 text-xs px-3 transition-[background-color,box-shadow,color] duration-[180ms] ease-in-out hover:!bg-[#1D4ED8] hover:!shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] focus-visible:!ring-2 focus-visible:!ring-[#2563EB]/40"
           disabled={!report || reportQuery.isFetching}
           onClick={exportCsv}
         >
@@ -649,7 +649,7 @@ export default function AdminSales() {
                           <td className="px-4 py-2.5 text-right tabular-nums text-zinc-400">{fmtMoney(p.cost)}</td>
                           <td
                             className={`px-4 py-2.5 text-right tabular-nums font-medium ${
-                              p.profit >= 0 ? "text-[#bef264]" : "text-red-300"
+                              p.profit >= 0 ? "text-[#93C5FA]" : "text-red-300"
                             }`}
                           >
                             {fmtMoney(p.profit)}
@@ -693,7 +693,7 @@ export default function AdminSales() {
                           <td className="px-4 py-2.5 text-right tabular-nums text-zinc-400">{fmtMoney(row.cost)}</td>
                           <td
                             className={`px-4 py-2.5 text-right tabular-nums font-medium ${
-                              row.profit >= 0 ? "text-[#bef264]" : "text-red-300"
+                              row.profit >= 0 ? "text-[#93C5FA]" : "text-red-300"
                             }`}
                           >
                             {fmtMoney(row.profit)}
@@ -727,11 +727,11 @@ function Kpi({ label, value, hint, accent }: { label: string; value: string; hin
   return (
     <div
       className={`${adminRadiusPanelClass} border px-4 py-3.5 bg-[#121214] shadow-sm min-h-[5.75rem] flex flex-col justify-center ${
-        accent ? "border-[#3f6212]/40 shadow-[inset_0_0_0_1px_rgba(132,204,22,0.08)]" : "border-zinc-800/90"
+        accent ? "border-[#1E40AF]/40 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.14)]" : "border-zinc-800/90"
       }`}
     >
       <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-500">{label}</p>
-      <p className={`text-lg font-semibold mt-1 tabular-nums ${accent ? "text-[#bef264]" : "text-zinc-50"}`}>{value}</p>
+      <p className={`text-lg font-semibold mt-1 tabular-nums ${accent ? "text-[#93C5FA]" : "text-zinc-50"}`}>{value}</p>
       {hint && <p className="text-[10px] text-zinc-600 mt-1">{hint}</p>}
     </div>
   );
@@ -765,7 +765,7 @@ function SortTh({
         onClick={() => onSort(k)}
         className={cn(
           salesSortBtnClass,
-          active === k ? "text-[#a3e635] hover:text-[#bef264]" : "text-zinc-500"
+          active === k ? "text-[#60A5FA] hover:text-[#93C5FA]" : "text-zinc-500"
         )}
       >
         {label}

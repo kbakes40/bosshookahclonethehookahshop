@@ -1,5 +1,5 @@
 // Home Page - Neo-Brutalism meets Luxury Retail
-// Design Philosophy: Bold typography, stark contrasts, emerald green accents, asymmetric layouts
+// Design Philosophy: Bold typography, stark contrasts, electric blue accents, asymmetric layouts
 
 import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
@@ -34,7 +34,7 @@ export default function Home() {
       description: "Experience bold new flavors crafted for enthusiasts",
       cta: "SHOP NOW",
       link: "/collections/shisha",
-      bg: "linear-gradient(135deg, #10B981 0%, #059669 100%)"
+      bg: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)"
     },
     {
       title: "LUXURY HOOKAHS",

@@ -250,7 +250,7 @@ function AnalyticsDashboard({ data, isFetching }: { data: Ga4OverviewSuccess; is
                 labelStyle={{ color: "#a1a1aa" }}
               />
               <Legend wrapperStyle={{ fontSize: 12, color: "#a1a1aa" }} />
-              <Line type="monotone" dataKey="users" name="Users" stroke="#a3e635" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="users" name="Users" stroke="#60A5FA" strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="sessions" name="Sessions" stroke="#71717a" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -361,7 +361,7 @@ function StatCard({
       <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-500">{label}</p>
       <p className="text-2xl font-semibold text-zinc-50 mt-1 tabular-nums tracking-tight">{value}</p>
       {subtitle != null && (
-        <p className="text-[11px] text-[#a3e635]/90 mt-1 truncate" title={subtitle}>
+        <p className="text-[11px] text-[#60A5FA]/90 mt-1 truncate" title={subtitle}>
           {subtitle}
         </p>
       )}

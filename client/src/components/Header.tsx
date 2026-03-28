@@ -112,7 +112,9 @@ export default function Header() {
               <Link href="/" className="flex items-center gap-3">
                 <div className="font-display font-black text-2xl tracking-tight">
                   THE HOOKAH SHOP
-                  <span className="block text-xs font-bold tracking-wider text-primary">WHOLESALE</span>
+                  <span className="block max-w-[min(100vw-8rem,20rem)] text-[0.65rem] sm:text-xs font-bold tracking-wide text-primary leading-snug">
+                    Premium Hookah and Smoke Essentials
+                  </span>
                 </div>
               </Link>
             </div>

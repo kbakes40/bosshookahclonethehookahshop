@@ -78,7 +78,7 @@ export const checkoutRouter = router({
         customerName: z.string(),
         customerPhone: z.string(),
         /** Cart total in cents (matches Stripe `amount_total`) */
-        totalAmount: z.number(),
+        totalAmount: z.number().int().nonnegative(),
       })
     )
     .mutation(async ({ ctx, input }) => {

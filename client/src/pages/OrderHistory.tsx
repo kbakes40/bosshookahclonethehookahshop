@@ -43,7 +43,7 @@ export default function OrderHistory() {
   const getStatusColor = (label: string) => {
     switch (label) {
       case "Delivered":
-        return "bg-green-500 text-white";
+        return "bg-blue-600 text-white";
       case "In Transit":
         return "bg-blue-500 text-white";
       case "Processing":

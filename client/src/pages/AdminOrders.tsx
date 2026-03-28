@@ -23,7 +23,7 @@ import { Search, Trash2 } from "lucide-react";
 
 function payBadge(status: string) {
   const st = (status || "").toLowerCase();
-  if (st === "paid") return "bg-[#1a2312] text-[#bef264] border border-[#3f6212]/45";
+  if (st === "paid") return "bg-[#172554] text-[#93C5FA] border border-[#1E40AF]/45";
   if (st === "pending") return "bg-amber-950/55 text-amber-200 border border-amber-900/45";
   if (st === "failed") return "bg-red-950/50 text-red-200 border border-red-900/50";
   if (st === "refunded") return "bg-zinc-800 text-zinc-300 border border-zinc-700";
@@ -255,7 +255,7 @@ export default function AdminOrders() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="h-7 text-[11px] bg-[#3f6212] hover:bg-[#4d7c0f] text-[#ecfccb]"
+                                className="h-7 text-[11px] bg-[#1E40AF] hover:bg-[#1D4ED8] text-[#DBEAFE]"
                                 onClick={() => {
                                   if (confirm(`Confirm Zelle payment received for order #${order.id}?`)) {
                                     confirmZellePayment.mutate({ orderId: order.id });

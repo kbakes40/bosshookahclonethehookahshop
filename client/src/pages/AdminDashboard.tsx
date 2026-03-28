@@ -29,7 +29,7 @@ function StatusBadge({ status }: { status: string }) {
   const st = (status || "").toLowerCase();
   const paidLike = ["paid", "completed", "delivered"].includes(st);
   const cls = paidLike
-    ? "bg-[#1a2312] text-[#bef264] border border-[#3f6212]/50"
+    ? "bg-[#172554] text-[#93C5FA] border border-[#1E40AF]/50"
     : st === "pending"
       ? "bg-amber-950/60 text-amber-200/95 border border-amber-900/50"
       : "bg-zinc-800 text-zinc-400 border border-zinc-700/80";
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
                   title="Recent orders"
                   action={
                     <Link href="/admin/orders">
-                      <a className="text-xs font-medium text-[#a3e635] hover:text-[#bef264] inline-flex items-center gap-1">
+                      <a className="text-xs font-medium text-[#60A5FA] hover:text-[#93C5FA] inline-flex items-center gap-1">
                         View all <ArrowRight className="h-3 w-3" />
                       </a>
                     </Link>
@@ -271,13 +271,13 @@ export default function AdminDashboard() {
   );
 }
 
-/** Subtle green emphasis only on primary revenue metric */
+/** Subtle blue emphasis only on primary revenue metric */
 function StatCardAccent({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className={`${adminPanelClass} p-4 relative overflow-hidden`}>
-      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#84cc16]/80" aria-hidden />
+      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#3B82F6]/80" aria-hidden />
       <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500 pl-1">{label}</p>
-      <p className="text-2xl font-semibold text-[#bef264] mt-1 tabular-nums tracking-tight pl-1">{value}</p>
+      <p className="text-2xl font-semibold text-[#93C5FA] mt-1 tabular-nums tracking-tight pl-1">{value}</p>
       {sub && <p className="text-[11px] mt-1 text-zinc-500 pl-1">{sub}</p>}
     </div>
   );

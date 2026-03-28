@@ -1,7 +1,7 @@
 // Cart Context - Neo-Brutalism meets Luxury Retail
 // Manages shopping cart state across the application
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { toast } from "sonner";
 import { Product } from "@/lib/products";
 
@@ -11,7 +11,7 @@ function isMobileViewport(): boolean {
   return window.matchMedia("(max-width: 767px)").matches;
 }
 
-interface CartItem extends Product {
+export interface CartItem extends Product {
   quantity: number;
   selectedVariantId?: string; // Track which variant was selected
   selectedVariantName?: string; // Display name of the variant
@@ -22,6 +22,8 @@ interface CartContextType {
   addToCart: (product: Product, quantity: number, variantId?: string) => void;
   removeFromCart: (productId: string, variantId?: string) => void;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  /** Replace cart contents (e.g. restore Zelle checkout after refresh). */
+  replaceCart: (items: CartItem[]) => void;
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
@@ -107,6 +109,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
+  const replaceCart = useCallback((next: CartItem[]) => {
+    setItems(next);
+  }, []);
+
   const cartTotal = items.reduce(
     (sum, item) => sum + (item.salePrice || item.price) * item.quantity,
     0
@@ -124,6 +130,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addToCart,
         removeFromCart,
         updateQuantity,
+        replaceCart,
         clearCart,
         cartTotal,
         cartCount,

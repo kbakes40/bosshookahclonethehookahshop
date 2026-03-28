@@ -177,7 +177,12 @@ export default function AdminStoreSettings() {
                       <Phone className="w-4 h-4" />
                       Zelle phone
                     </label>
-                    <Input value={zellePhone} onChange={e => setZellePhone(e.target.value)} className={inputClass} />
+                    <Input
+                      value={zellePhone}
+                      onChange={e => setZellePhone(e.target.value)}
+                      className={inputClass}
+                      placeholder="313-200-1873"
+                    />
                   </div>
                 </div>
               </div>
@@ -195,7 +200,7 @@ export default function AdminStoreSettings() {
               <Button
                 type="submit"
                 disabled={updateSettings.isPending}
-                className="bg-[#3f6212] hover:bg-[#4d7c0f] text-[#ecfccb]"
+                className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-[#DBEAFE]"
               >
                 {updateSettings.isPending ? "Saving…" : "Save"}
               </Button>

@@ -8,14 +8,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Copy, CheckCircle2, MapPin, Phone, Mail } from "lucide-react";
+import { TRPCClientError } from "@trpc/client";
+import { Copy, CheckCircle2, MapPin, Phone } from "lucide-react";
 import { calculateShipping, orderGrandTotalUsd } from "@shared/shipping";
-import { CHECKOUT_SHIPPING_ZIP_KEY } from "@/lib/paypalCheckoutStorage";
+import {
+  CHECKOUT_SHIPPING_ZIP_KEY,
+  ZELLE_CHECKOUT_CART_KEY,
+  clearZelleCheckoutCartBackup,
+} from "@/lib/paypalCheckoutStorage";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
+import type { CartItem } from "@/contexts/CartContext";
+
+/** Shown when `bh_store_settings.zelle_*` is empty; keep in sync with store operations. */
+const DEFAULT_ZELLE_PHONE = "313-200-1873";
+const ZELLE_RECIPIENT_BUSINESS_NAME = "AMPRO RETAIL STORES LLC";
 
 export default function ZelleCheckout() {
   const [, setLocation] = useLocation();
-  const { items, cartTotal, clearCart } = useCart();
+  const { items, cartTotal, clearCart, replaceCart } = useCart();
   const { formatUsd, displayTotals } = useShopCurrency();
   const [orderId, setOrderId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -23,12 +33,12 @@ export default function ZelleCheckout() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Format phone number as XXX-XXX-XXXX
+  // Format phone number as XXX-XXX-XXXX (strip leading US country code 1)
   const formatPhoneNumber = (value: string) => {
-    // Remove all non-digit characters
-    const digits = value.replace(/\D/g, '');
-    
-    // Limit to 10 digits
+    let digits = value.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith("1")) {
+      digits = digits.slice(1);
+    }
     const limited = digits.slice(0, 10);
     
     // Format with dashes
@@ -79,12 +89,21 @@ export default function ZelleCheckout() {
   const checkoutTotals = displayTotals(cartTotal, shipUsd);
 
   useEffect(() => {
-    // Redirect if cart is empty
-    if (items.length === 0) {
-      setLocation("/");
-      return;
+    if (items.length > 0) return;
+    try {
+      const raw = sessionStorage.getItem(ZELLE_CHECKOUT_CART_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { items?: CartItem[] };
+        if (parsed.items?.length) {
+          replaceCart(parsed.items);
+          return;
+        }
+      }
+    } catch {
+      /* ignore corrupt snapshot */
     }
-  }, [items, setLocation]);
+    setLocation("/");
+  }, [items.length, replaceCart, setLocation]);
 
   const handleSubmitOrder = async () => {
     if (!customerName.trim()) {
@@ -95,10 +114,19 @@ export default function ZelleCheckout() {
       toast.error("Please enter your phone number");
       return;
     }
-    // Validate phone number has 10 digits
-    const phoneDigits = customerPhone.replace(/\D/g, '');
+    let phoneDigits = customerPhone.replace(/\D/g, "");
+    if (phoneDigits.length === 11 && phoneDigits.startsWith("1")) {
+      phoneDigits = phoneDigits.slice(1);
+    }
     if (phoneDigits.length !== 10) {
-      toast.error("Please enter a valid 10-digit phone number");
+      toast.error("Please enter a valid 10-digit US phone number");
+      return;
+    }
+    const customerPhoneNormalized = `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`;
+
+    const totalCents = Math.round(orderGrandTotal * 100);
+    if (!Number.isFinite(totalCents) || totalCents < 0) {
+      toast.error("Invalid order total. Refresh and try again.");
       return;
     }
 
@@ -116,14 +144,23 @@ export default function ZelleCheckout() {
         items: orderItems,
         deliveryMethod,
         customerName: customerName.trim(),
-        customerPhone: customerPhone.trim(),
-        totalAmount: Math.round(orderGrandTotal * 100),
+        customerPhone: customerPhoneNormalized,
+        totalAmount: totalCents,
       });
 
       setOrderId(result.orderId);
+      clearZelleCheckoutCartBackup();
       toast.success("Order created! Please send payment via Zelle");
     } catch (error) {
-      toast.error("Failed to create order");
+      console.error("[ZelleCheckout] createZelleOrder failed:", error);
+      const msg =
+        error instanceof TRPCClientError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Failed to create order";
+      toast.error(msg);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -135,8 +172,8 @@ export default function ZelleCheckout() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const zelleEmail = storeSettings.data?.zelleEmail || "payment@bosshookah.com";
-  const zellePhone = storeSettings.data?.zellePhone || "313-406-6589";
+  const zelleEmail = storeSettings.data?.zelleEmail?.trim() || "";
+  const zellePhone = storeSettings.data?.zellePhone?.trim() || DEFAULT_ZELLE_PHONE;
 
   // Show customer info form if order not created yet
   if (!orderId) {
@@ -250,7 +287,10 @@ export default function ZelleCheckout() {
             <div className="flex gap-4">
               <Button
                 variant="outline"
-                onClick={() => setLocation("/")}
+                onClick={() => {
+                  clearZelleCheckoutCartBackup();
+                  setLocation("/");
+                }}
                 className="flex-1 brutalist-border"
                 disabled={isSubmitting}
               >
@@ -290,21 +330,32 @@ export default function ZelleCheckout() {
           <div className="space-y-6">
             <div className="bg-secondary brutalist-border p-6 space-y-4">
               <h2 className="font-display font-bold text-lg">PAYMENT INSTRUCTIONS</h2>
+              <p className="text-sm leading-relaxed text-foreground">
+                We offer payment through Zelle. Send payment to{" "}
+                <span className="font-semibold">{zellePhone}</span>. It will be under{" "}
+                <span className="font-semibold">{ZELLE_RECIPIENT_BUSINESS_NAME}</span>. Please send a
+                text to confirm your order. Thank you for your business.
+              </p>
               <ol className="list-decimal list-inside space-y-2 text-sm">
                 <li>Open your banking app and select Zelle</li>
-                <li>Send {formatUsd(orderGrandTotal)} to one of the following:</li>
+                <li>
+                  Send <span className="font-semibold">{formatUsd(orderGrandTotal)}</span> using the
+                  recipient name and phone number below
+                </li>
               </ol>
 
-              {/* Zelle Email */}
+              {/* Recipient / business name (Zelle payee) */}
               <div className="bg-background brutalist-border p-4 space-y-2">
-                <p className="text-xs font-bold text-muted-foreground">EMAIL</p>
+                <p className="text-xs font-bold text-muted-foreground">RECIPIENT / BUSINESS NAME</p>
                 <div className="flex items-center justify-between gap-4">
-                  <p className="font-mono text-lg">{zelleEmail}</p>
+                  <p className="font-mono text-base sm:text-lg break-words pr-2">
+                    {ZELLE_RECIPIENT_BUSINESS_NAME}
+                  </p>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => copyToClipboard(zelleEmail)}
-                    className="brutalist-border"
+                    onClick={() => copyToClipboard(ZELLE_RECIPIENT_BUSINESS_NAME)}
+                    className="brutalist-border shrink-0"
                   >
                     {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -313,7 +364,7 @@ export default function ZelleCheckout() {
 
               {/* Zelle Phone */}
               <div className="bg-background brutalist-border p-4 space-y-2">
-                <p className="text-xs font-bold text-muted-foreground">PHONE</p>
+                <p className="text-xs font-bold text-muted-foreground">PHONE (ZELLE)</p>
                 <div className="flex items-center justify-between gap-4">
                   <p className="font-mono text-lg">{zellePhone}</p>
                   <Button
@@ -327,9 +378,28 @@ export default function ZelleCheckout() {
                 </div>
               </div>
 
+              {/* Optional email from admin settings only */}
+              {zelleEmail ? (
+                <div className="bg-background brutalist-border p-4 space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground">EMAIL (IF SHOWN IN YOUR BANK APP)</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-mono text-lg break-all">{zelleEmail}</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(zelleEmail)}
+                      className="brutalist-border shrink-0"
+                    >
+                      {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+
               <ol start={3} className="list-decimal list-inside space-y-2 text-sm">
-                <li>Include your order number (#{orderId}) in the payment note</li>
-                <li>We'll confirm your order once payment is received</li>
+                <li>Include your order number (#{orderId}) in the payment note / memo</li>
+                <li>Send a text message to confirm your order after payment</li>
+                <li>We will confirm your order once payment is received</li>
               </ol>
             </div>
 
@@ -394,6 +464,7 @@ export default function ZelleCheckout() {
           <div className="flex gap-4">
             <Button
               onClick={() => {
+                clearZelleCheckoutCartBackup();
                 clearCart();
                 setLocation("/");
               }}

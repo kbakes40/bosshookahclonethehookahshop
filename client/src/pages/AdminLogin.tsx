@@ -45,7 +45,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <main className="min-h-screen bg-[#d7ff3f] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#1D4ED8] flex items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-[28px] bg-[#050505] p-8 shadow-2xl">
         {/* Logo — matches admin shell store mark */}
         <div className="flex flex-col items-center mb-8">
@@ -53,7 +53,7 @@ export default function AdminLogin() {
             className="h-12 w-12 rounded-2xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center mb-4 shadow-inner"
             aria-hidden
           >
-            <Store className="h-6 w-6 text-[#d7ff3f]" strokeWidth={1.75} aria-hidden />
+            <Store className="h-6 w-6 text-[#60A5FA]" strokeWidth={1.75} aria-hidden />
           </div>
           <h1 className="text-xl font-bold text-zinc-50">The Hookah Shop Admin</h1>
           <p className="text-xs text-zinc-500 mt-1">Sign in to your dashboard</p>
@@ -63,7 +63,7 @@ export default function AdminLogin() {
         <button
           onClick={() => signInWithGoogle()}
             disabled={sessionLoading}
-          className="w-full flex items-center justify-center gap-3 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm font-medium text-zinc-200 hover:border-[#d7ff3f] hover:text-[#d7ff3f] transition-colors mb-6"
+          className="w-full flex items-center justify-center gap-3 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm font-medium text-zinc-200 hover:border-[#60A5FA] hover:text-[#60A5FA] transition-colors mb-6"
         >
           <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.5 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/>
@@ -90,7 +90,7 @@ export default function AdminLogin() {
               onChange={e => setEmail(e.target.value)}
               required
               placeholder="admin@bosshookah.site"
-              className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#d7ff3f] transition-colors"
+              className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#60A5FA] transition-colors"
             />
           </div>
           <div>
@@ -101,7 +101,7 @@ export default function AdminLogin() {
               onChange={e => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#d7ff3f] transition-colors"
+              className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#60A5FA] transition-colors"
             />
           </div>
           {error && (
@@ -118,7 +118,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={submitting || sessionLoading}
-            className="w-full rounded-xl bg-[#d7ff3f] text-zinc-900 font-semibold py-3 text-sm hover:bg-[#c8f030] transition-colors disabled:opacity-50 mt-2"
+            className="w-full rounded-xl bg-[#60A5FA] text-slate-950 font-semibold py-3 text-sm hover:bg-[#93C5FD] transition-colors disabled:opacity-50 mt-2"
           >
             {submitting ? "Signing in…" : "Sign In"}
           </button>

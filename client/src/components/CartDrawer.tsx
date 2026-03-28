@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import {
   PAYPAL_CHECKOUT_STORAGE_KEY,
   CHECKOUT_SHIPPING_ZIP_KEY,
+  saveZelleCheckoutCartBackup,
 } from "@/lib/paypalCheckoutStorage";
 import { calculateShipping, orderGrandTotalUsd, FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
@@ -319,6 +320,7 @@ export default function CartDrawer() {
                 } else {
                   sessionStorage.removeItem(CHECKOUT_SHIPPING_ZIP_KEY);
                 }
+                saveZelleCheckoutCartBackup(items);
                 closeCart();
                 setLocation(`/zelle-checkout?delivery=${deliveryMethod}`);
               } else if (paymentMethod === "bitcoin") {
