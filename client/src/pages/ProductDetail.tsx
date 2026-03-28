@@ -18,6 +18,7 @@ import { useCart } from "@/contexts/CartContext";
 import { trpc } from "@/lib/trpc";
 import { useShopCurrency } from "@/contexts/CurrencyContext";
 import { FREE_SHIPPING_THRESHOLD_USD } from "@shared/shipping";
+import { getAuthRedirectOrigin } from "@/lib/authRedirect";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/product/:id");
@@ -72,7 +73,13 @@ export default function ProductDetail() {
       product.category?.toLowerCase() === "shisha"
         ? orderedShishaVariants(product.variants)[0]
         : product.variants[0];
-    setSelectedVariant(first?.id ?? "");
+    const fromUrl =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("variant")?.trim()
+        : "";
+    const pick =
+      fromUrl && product.variants.some(v => v.id === fromUrl) ? fromUrl : (first?.id ?? "");
+    setSelectedVariant(pick);
     setSelectedImage(0);
   }, [product?.id, product?.category, variantIdsKey]);
 
@@ -132,6 +139,39 @@ export default function ProductDetail() {
       if ('vibrate' in navigator) {
         navigator.vibrate(50); // 50ms vibration
       }
+    }
+  };
+
+  const handleShareProduct = async () => {
+    const origin = getAuthRedirectOrigin();
+    const path = `/product/${encodeURIComponent(product.id)}`;
+    const qs = selectedVariant ? `?variant=${encodeURIComponent(selectedVariant)}` : "";
+    const url = `${origin}${path}${qs}`;
+    const title = product.name;
+    const variantLabel = product.variants?.find(v => v.id === selectedVariant)?.name;
+    const text = variantLabel ? `${product.name} — ${variantLabel}` : product.name;
+
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        await navigator.share({ title, text, url });
+        return;
+      }
+    } catch (err) {
+      const aborted =
+        err instanceof DOMException
+          ? err.name === "AbortError"
+          : err != null &&
+            typeof err === "object" &&
+            "name" in err &&
+            (err as { name: string }).name === "AbortError";
+      if (aborted) return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Could not share or copy link");
     }
   };
 
@@ -334,7 +374,8 @@ export default function ProductDetail() {
               <Button
                 variant="ghost"
                 className="w-full justify-start"
-                onClick={() => toast.success('Link copied to clipboard')}
+                type="button"
+                onClick={() => void handleShareProduct()}
               >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
