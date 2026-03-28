@@ -58,15 +58,24 @@ function latestCreatedIso(rows: BhProductRow[]): string | undefined {
   return best > 0 ? new Date(best).toISOString() : undefined;
 }
 
-/** Storefront-only fixes for catalog keys; keep in sync with migrations when possible. */
+/** THS Woo parent image — device + flavor lineup (better card than a single flavor SKU shot). */
+const AL_FAKHER_CROWN_BAR_8000_STORE_IMAGE =
+  "https://thehookahshop.com/wp-content/uploads/2024/09/al-fakher_crown_bar-disposable_vape_device-flavors_1024x1024@2x.webp";
+
+/** Storefront-only hooks for catalog keys (no DB writes). */
 function applyCatalogStorefrontOverride(product: Product, catalogKey: string): Product {
-  if (catalogKey !== "6") return product;
-  return {
-    ...product,
-    price: 0.01,
-    salePrice: undefined,
-    badge: undefined,
-  };
+  if (catalogKey === "6") {
+    return {
+      ...product,
+      price: 0.01,
+      salePrice: undefined,
+      badge: undefined,
+    };
+  }
+  if (catalogKey === "ths-wp-8474") {
+    return { ...product, image: AL_FAKHER_CROWN_BAR_8000_STORE_IMAGE };
+  }
+  return product;
 }
 
 function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
