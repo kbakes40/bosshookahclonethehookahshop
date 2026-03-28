@@ -1,14 +1,27 @@
 import type { Plugin } from "vite";
 
-/** Public HTTPS origin for canonical + Open Graph (no trailing slash). */
+function normalizeSiteOrigin(raw: string): string {
+  const t = raw.trim().replace(/\/$/, "");
+  if (/^https?:\/\//i.test(t)) return t;
+  return `https://${t.replace(/^\/\//, "")}`;
+}
+
+/**
+ * Public HTTPS origin for canonical + Open Graph (no trailing slash).
+ * Prefer VITE_SITE_ORIGIN so shared links (e.g. davincidynamics.site) match og:image host.
+ */
 function siteOrigin(): string {
   const explicit = process.env.VITE_SITE_ORIGIN?.trim();
   if (explicit) {
-    return explicit.replace(/\/$/, "");
+    return normalizeSiteOrigin(explicit);
+  }
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (production) {
+    return normalizeSiteOrigin(production);
   }
   const vercel = process.env.VERCEL_URL?.trim();
   if (vercel) {
-    return `https://${vercel}`;
+    return normalizeSiteOrigin(vercel.includes("://") ? vercel : `https://${vercel}`);
   }
   return "https://www.thehookahshop.com";
 }

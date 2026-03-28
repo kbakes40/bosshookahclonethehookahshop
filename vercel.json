@@ -30,7 +30,7 @@
       "destination": "/api/index"
     },
     {
-      "source": "/((?!api/|\\.well-known/).*)",
+      "source": "/((?!api/|\\.well-known/|assets/|images/|products/|__manus__/|favicon|site\\.webmanifest|robots\\.txt|sitemap|og-image\\.png|apple-touch|android-chrome-|web-app-manifest-|hookah-brand|brand-icon\\.png).*)",
       "destination": "/index.html"
     }
   ],

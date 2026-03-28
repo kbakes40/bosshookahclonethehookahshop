@@ -13,17 +13,17 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="%SITE_ORIGIN%/" />
     
-    <!-- Open Graph — og-image.png is the THS hookah mark; used by iMessage/SMS rich previews, Facebook, etc. Requires absolute URL: set VITE_SITE_ORIGIN on Vercel to your live origin (e.g. https://www.davincidynamics.site). -->
+    <!-- Open Graph — iMessage / SMS rich preview uses og:image (needs absolute URL on the same host you share). Set VITE_SITE_ORIGIN on Vercel, e.g. https://www.davincidynamics.site -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="%SITE_ORIGIN%/" />
     <meta property="og:title" content="The Hookah Shop - Premium Shisha, Vapes & Charcoal" />
     <meta property="og:description" content="Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at The Hookah Shop. Quality products, competitive prices, and fast shipping." />
-    <meta property="og:image" content="%SITE_ORIGIN%/og-image.png" />
-    <meta property="og:image:secure_url" content="%SITE_ORIGIN%/og-image.png" />
+    <meta property="og:image" content="%SITE_ORIGIN%/og-image.png?v=3" />
+    <meta property="og:image:secure_url" content="%SITE_ORIGIN%/og-image.png?v=3" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="1200" />
-    <meta property="og:image:alt" content="The Hookah Shop hookah logo" />
+    <meta property="og:image:alt" content="The Hookah Shop" />
     <meta property="og:site_name" content="The Hookah Shop" />
     <meta property="og:locale" content="en_US" />
     
@@ -32,8 +32,8 @@
     <meta name="twitter:url" content="%SITE_ORIGIN%/" />
     <meta name="twitter:title" content="The Hookah Shop - Premium Shisha, Vapes & Charcoal" />
     <meta name="twitter:description" content="Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at The Hookah Shop. Quality products, competitive prices, and fast shipping." />
-    <meta name="twitter:image" content="%SITE_ORIGIN%/og-image.png" />
-    <meta name="twitter:image:alt" content="The Hookah Shop hookah logo" />
+    <meta name="twitter:image" content="%SITE_ORIGIN%/og-image.png?v=3" />
+    <meta name="twitter:image:alt" content="The Hookah Shop" />
     
     <!-- Business Info -->
     <meta name="geo.region" content="US-MI" />
@@ -41,13 +41,12 @@
     <meta name="geo.position" content="42.3386644;-83.1956699" />
     <meta name="ICBM" content="42.3386644, -83.1956699" />
     
-    <!-- Favicon — THS hookah mark (blue/black); source: client/public/hookah-brand-source.png -->
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <!-- PNG first so browsers use the THS hookah mark even if .ico is cached from an old host (e.g. Replit). Query busts stale CDNs. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=ths2" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=ths2" />
+    <link rel="icon" href="/favicon.ico?v=ths2" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=ths2" />
+    <link rel="manifest" href="/site.webmanifest?v=ths2" />
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

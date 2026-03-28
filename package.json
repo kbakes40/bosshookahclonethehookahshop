@@ -25,7 +25,8 @@
     "verify:supabase": "node scripts/verify-supabase-match.js",
     "admin:ensure-user": "node scripts/ensure-admin-auth-user.js",
     "test:lookup-api": "node scripts/test-api-route.js",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "favicon:ico": "node scripts/generate-favicon-ico.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
@@ -110,6 +111,7 @@
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
+    "png-to-ico": "2.1.8",
     "pnpm": "^10.15.1",
     "postcss": "^8.4.47",
     "prettier": "^3.6.2",
