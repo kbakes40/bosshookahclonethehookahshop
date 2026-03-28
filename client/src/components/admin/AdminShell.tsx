@@ -1,5 +1,5 @@
 /**
- * Boss Hookah admin layout — dark Shopify-inspired shell, restrained accent (lime only for key actions).
+ * The Hookah Shop admin layout — dark Shopify-inspired shell, restrained accent (lime only for key actions).
  */
 import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
@@ -81,7 +81,7 @@ export function AdminShell({ title, subtitle, children, headerTrailing }: AdminS
                 <Store className="h-4 w-4 text-[#a3e635] group-hover:text-[#bef264] transition-colors" />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-zinc-100 truncate leading-tight">Boss Hookah</p>
+                <p className="font-semibold text-zinc-100 truncate leading-tight">The Hookah Shop</p>
                 <p className="text-[10px] uppercase tracking-wider text-zinc-500">Wholesale admin</p>
               </div>
             </a>

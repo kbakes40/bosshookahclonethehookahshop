@@ -24,7 +24,7 @@ export default function Home() {
 
   // Set page title for SEO (30-60 characters)
   useEffect(() => {
-    document.title = "Boss Hookah Wholesale - Premium Shisha & Vapes";
+    document.title = "The Hookah Shop - Premium Shisha & Vapes";
   }, []);
 
   const heroSlides = [

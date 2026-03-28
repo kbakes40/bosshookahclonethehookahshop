@@ -247,7 +247,7 @@ export default function AdminSales() {
   const exportCsv = () => {
     if (!report) return;
     const rows: string[][] = [
-      ["Boss Hookah Sales Report"],
+      ["The Hookah Shop Sales Report"],
       ["Date from", report.dateFrom],
       ["Date to", report.dateTo],
       ["Delivery filter", report.deliveryMethod],

@@ -15,7 +15,7 @@ export default function MemberPerks() {
         <div className="container max-w-4xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-display font-black">BOSS HOOKAH REWARDS</h1>
+            <h1 className="text-4xl font-display font-black">THE HOOKAH SHOP REWARDS</h1>
             <button
               onClick={() => setLocation("/")}
               className="w-12 h-12 brutalist-border flex items-center justify-center hover:bg-primary hover:text-white transition-colors"

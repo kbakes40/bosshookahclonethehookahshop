@@ -16,7 +16,7 @@ import {
 const defaultStoreSettings = () =>
   mapStoreSettingsRow({
     id: null,
-    store_name: "The Boss Hookah Wholesale",
+    store_name: "The Hookah Shop",
     address: "6520 Greenfield Rd",
     city: "Dearborn",
     state: "MI",

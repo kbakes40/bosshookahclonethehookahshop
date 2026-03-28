@@ -14,7 +14,7 @@ export default function Returns() {
 
           <div className="brutalist-border bg-secondary p-8 md:p-12 space-y-6 prose prose-lg max-w-none">
             <p className="text-lg font-semibold leading-relaxed">
-              All sales are final. Boss Hookah Wholesale operates a strict no-return policy on
+              All sales are final. The Hookah Shop operates a strict no-return policy on
               age-restricted and consumable inventory. By completing a purchase, you acknowledge and
               accept this policy in full.
             </p>
@@ -55,7 +55,7 @@ export default function Returns() {
                 </li>
                 <li>
                   Approved resolutions — including replacement, store credit, or refund — are
-                  offered solely at <strong>Boss Hookah&apos;s discretion</strong> and depend on
+                  offered solely at <strong>The Hookah Shop&apos;s discretion</strong> and depend on
                   inventory, compliance, and verification. We may request additional proof before
                   approving any resolution.
                 </li>

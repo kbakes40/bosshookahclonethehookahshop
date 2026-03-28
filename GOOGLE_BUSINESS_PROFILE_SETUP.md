@@ -1,5 +1,5 @@
 # Google Business Profile Setup Guide
-## Boss Hookah Wholesale
+## The Hookah Shop
 
 Setting up a Google Business Profile will help your business appear in:
 - Google Search results for "hookah near me" and related queries
@@ -17,7 +17,7 @@ Setting up a Google Business Profile will help your business appear in:
 
 2. **Add Your Business**
    - Click "Manage now" or "Add your business to Google"
-   - Enter business name: **Boss Hookah Wholesale**
+   - Enter business name: **The Hookah Shop**
    - Click "Next"
 
 3. **Choose Business Category**
@@ -67,7 +67,7 @@ Once verified (or while waiting for verification), complete your profile:
 
 2. **Business Description** (750 characters max)
    ```
-   Boss Hookah Wholesale is your premier destination for premium hookahs, shisha tobacco, vapes, charcoal, and smoking accessories. We offer an extensive selection of top brands including Al Fakher, Starbuzz, Geek Bar, and more. Whether you're a hookah enthusiast, lounge owner, or retailer, we provide quality products at competitive wholesale prices with fast shipping. Browse our collection of modern and traditional hookahs, exotic shisha flavors, natural coconut charcoal, disposable vapes, and essential accessories. Shop online at www.bosshookah.site for the best deals on hookah supplies.
+   The Hookah Shop is your premier destination for premium hookahs, shisha tobacco, vapes, charcoal, and smoking accessories. We offer an extensive selection of top brands including Al Fakher, Starbuzz, Geek Bar, and more. Whether you're a hookah enthusiast, lounge owner, or retailer, we provide quality products at competitive wholesale prices with fast shipping. Browse our collection of modern and traditional hookahs, exotic shisha flavors, natural coconut charcoal, disposable vapes, and essential accessories. Shop online at www.bosshookah.site for the best deals on hookah supplies.
    ```
 
 3. **Opening Date**
@@ -102,7 +102,7 @@ For each, add:
 ### Photos (VERY IMPORTANT for SEO)
 
 Upload high-quality photos:
-- **Logo**: Your Boss Hookah logo (already have favicon)
+- **Logo**: Your Hookah Shop logo (already have favicon)
 - **Cover photo**: Hero image of your products or store
 - **Product photos**: 
   - Hookahs (Starbuzz Mini, various colors)

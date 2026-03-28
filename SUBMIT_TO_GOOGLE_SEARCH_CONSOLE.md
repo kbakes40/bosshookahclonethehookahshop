@@ -95,9 +95,9 @@ Speed up indexing by manually requesting Google to crawl your most important pag
 
 Once indexed, your site will appear like this in Google search results:
 
-**Title**: Boss Hookah Wholesale - Premium Shisha, Vapes & Charcoal  
+**Title**: The Hookah Shop - Premium Shisha, Vapes & Charcoal  
 **URL**: www.bosshookah.site  
-**Description**: Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at Boss Hookah Wholesale. Quality products, competitive prices, and fast shipping.
+**Description**: Shop premium hookahs, shisha tobacco, vapes, charcoal and accessories at The Hookah Shop. Quality products, competitive prices, and fast shipping.
 
 ---
 
@@ -108,7 +108,7 @@ Once indexed, your site will appear like this in Google search results:
 Your site is now optimized for these search terms:
 - "hookah shop Dearborn"
 - "hookah near me" (when searched in Dearborn area)
-- "boss hookah wholesale"
+- "the hookah shop"
 - "buy hookah Michigan"
 - "shisha tobacco Dearborn"
 - "vape shop near me"
@@ -218,7 +218,7 @@ Your site would benefit from adding structured data (JSON-LD) for:
 {
   "@context": "https://schema.org",
   "@type": "TobaccoShop",
-  "name": "The Boss Hookah Wholesale",
+  "name": "The Hookah Shop",
   "image": "https://www.bosshookah.site/android-chrome-512x512.png",
   "address": {
     "@type": "PostalAddress",

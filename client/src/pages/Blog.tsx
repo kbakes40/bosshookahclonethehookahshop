@@ -24,7 +24,7 @@ const blogPosts: BlogPost[] = [
     slug: "ultimate-guide-hookah-setup",
     excerpt: "Learn how to properly set up your hookah for the perfect smoking session. From packing the bowl to managing heat, we cover everything you need to know.",
     content: "",
-    author: "Boss Hookah Team",
+    author: "The Hookah Shop Team",
     date: "February 6, 2026",
     category: "Guides",
     readTime: "8 min read",
@@ -36,7 +36,7 @@ const blogPosts: BlogPost[] = [
     slug: "al-fakher-vs-starbuzz-comparison",
     excerpt: "Compare the two most popular shisha tobacco brands. Discover the differences in flavor profiles, cut, smoke output, and price to make an informed choice.",
     content: "",
-    author: "Boss Hookah Team",
+    author: "The Hookah Shop Team",
     date: "February 5, 2026",
     category: "Reviews",
     readTime: "6 min read",
@@ -48,7 +48,7 @@ const blogPosts: BlogPost[] = [
     slug: "best-shisha-flavors-2026",
     excerpt: "Explore the most popular and unique shisha flavors of 2026. From classic mint to exotic fruit blends, find your next favorite flavor.",
     content: "",
-    author: "Boss Hookah Team",
+    author: "The Hookah Shop Team",
     date: "February 4, 2026",
     category: "Guides",
     readTime: "7 min read",
@@ -60,7 +60,7 @@ const blogPosts: BlogPost[] = [
     slug: "natural-vs-quick-light-charcoal",
     excerpt: "Understanding the differences between coconut charcoal and quick-light charcoal. Learn which type is best for your hookah sessions.",
     content: "",
-    author: "Boss Hookah Team",
+    author: "The Hookah Shop Team",
     date: "February 3, 2026",
     category: "Guides",
     readTime: "5 min read",
@@ -72,7 +72,7 @@ const blogPosts: BlogPost[] = [
     slug: "hookah-cleaning-maintenance-guide",
     excerpt: "Proper maintenance is key to enjoying your hookah for years. Follow our step-by-step cleaning guide to keep your hookah in perfect condition.",
     content: "",
-    author: "Boss Hookah Team",
+    author: "The Hookah Shop Team",
     date: "February 2, 2026",
     category: "Maintenance",
     readTime: "6 min read",
@@ -84,7 +84,7 @@ const blogPosts: BlogPost[] = [
     slug: "starting-hookah-wholesale-business",
     excerpt: "Thinking about starting a hookah business? Learn about wholesale pricing, licensing requirements, inventory management, and marketing strategies.",
     content: "",
-    author: "Boss Hookah Team",
+    author: "The Hookah Shop Team",
     date: "February 1, 2026",
     category: "Business",
     readTime: "10 min read",
@@ -94,7 +94,7 @@ const blogPosts: BlogPost[] = [
 
 export default function Blog() {
   useEffect(() => {
-    document.title = "Hookah Blog - Tips, Guides & Reviews | Boss Hookah Wholesale";
+    document.title = "Hookah Blog - Tips, Guides & Reviews | The Hookah Shop";
   }, []);
 
   return (
@@ -180,7 +180,7 @@ export default function Blog() {
             <h2 className="text-3xl font-display font-black mb-6">Why Read Our Hookah Blog?</h2>
             <div className="prose prose-lg max-w-none">
               <p>
-                Welcome to the Boss Hookah Wholesale blog, your ultimate resource for everything related to hookahs, shisha tobacco, vapes, and smoking accessories. Whether you're a beginner looking to set up your first hookah or an experienced enthusiast seeking advanced tips, our expert guides cover it all.
+                Welcome to the The Hookah Shop blog, your ultimate resource for everything related to hookahs, shisha tobacco, vapes, and smoking accessories. Whether you're a beginner looking to set up your first hookah or an experienced enthusiast seeking advanced tips, our expert guides cover it all.
               </p>
               <p>
                 Our team of hookah experts shares in-depth product reviews, flavor comparisons, maintenance guides, and industry insights to help you make informed purchasing decisions. We cover popular brands like Al Fakher, Starbuzz, and Snoop Dogg's signature tobacco blends, providing honest assessments of quality, flavor profiles, and value.
@@ -189,7 +189,7 @@ export default function Blog() {
                 Learn about the differences between natural coconut charcoal and quick-light options, discover the best hookah bowls for optimal heat management, and explore the latest trends in modern hookah designs. Our blog also features business advice for entrepreneurs looking to enter the hookah wholesale market, including licensing requirements, supplier relationships, and marketing strategies.
               </p>
               <p>
-                Stay updated with new product launches, seasonal flavor releases, and exclusive deals from Boss Hookah Wholesale. Subscribe to our newsletter to receive the latest articles directly in your inbox and join our community of hookah enthusiasts across Dearborn, Michigan, and beyond.
+                Stay updated with new product launches, seasonal flavor releases, and exclusive deals from The Hookah Shop. Subscribe to our newsletter to receive the latest articles directly in your inbox and join our community of hookah enthusiasts across Dearborn, Michigan, and beyond.
               </p>
             </div>
           </div>

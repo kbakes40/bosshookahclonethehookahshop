@@ -16,8 +16,8 @@ export default function Terms() {
           <div className="prose prose-lg max-w-none space-y-8">
             <p className="text-lg leading-relaxed">
               These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and use of
-              bosshookah.site and any purchases you make through Boss Hookah Wholesale
-              (&quot;Boss Hookah,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). By
+              bosshookah.site and any purchases you make through The Hookah Shop
+              (&quot;The Hookah Shop,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). By
               using the site or placing an order, you agree to these Terms. If you do not agree, do
               not use the site or purchase from us.
             </p>
@@ -37,7 +37,7 @@ export default function Terms() {
             <section className="space-y-4">
               <h2 className="text-2xl font-display font-black">Eligibility &amp; age requirement</h2>
               <p className="leading-relaxed">
-                Boss Hookah is an adult-oriented retailer. You must be at least{" "}
+                The Hookah Shop is an adult-oriented retailer. You must be at least{" "}
                 <strong>21 years of age</strong> to purchase age-restricted products. By creating an
                 account, using the site, or placing an order, you represent and warrant that you are
                 at least 21 and that you are legally permitted to purchase, possess, and receive the
@@ -102,7 +102,7 @@ export default function Terms() {
               </p>
               <p className="leading-relaxed">
                 <strong>
-                  Boss Hookah may cancel or refuse any order that cannot be verified, appears
+                  The Hookah Shop may cancel or refuse any order that cannot be verified, appears
                   fraudulent, or cannot legally be shipped to the customer&apos;s location.
                 </strong>{" "}
                 If we cancel after payment, we will refund applicable amounts unless law or
@@ -121,7 +121,7 @@ export default function Terms() {
               </p>
               <p className="leading-relaxed">
                 <strong>
-                  Boss Hookah is not responsible for orders that are delayed, denied, returned,
+                  The Hookah Shop is not responsible for orders that are delayed, denied, returned,
                   refused by the carrier, or seized by authorities due to local restrictions, failed
                   age verification, incorrect addresses, recipient unavailability, or carrier or
                   customs handling.
@@ -161,7 +161,7 @@ export default function Terms() {
               <h2 className="text-2xl font-display font-black">Intellectual property</h2>
               <p className="leading-relaxed">
                 All content on the site — including text, graphics, logos, images, and software — is
-                owned by Boss Hookah or its licensors and is protected by copyright, trademark, and
+                owned by The Hookah Shop or its licensors and is protected by copyright, trademark, and
                 other laws. You may not copy, modify, distribute, or create derivative works without
                 our prior written consent. Product and brand names of third parties are used for
                 identification only and do not imply endorsement.
@@ -171,7 +171,7 @@ export default function Terms() {
             <section className="space-y-4">
               <h2 className="text-2xl font-display font-black">Limitation of liability</h2>
               <p className="leading-relaxed">
-                To the fullest extent permitted by applicable law, Boss Hookah and its officers,
+                To the fullest extent permitted by applicable law, The Hookah Shop and its officers,
                 directors, employees, and agents shall not be liable for any indirect, incidental,
                 special, consequential, or punitive damages, or for lost profits, data, or goodwill,
                 arising from your use of the site or purchase of products, whether based in contract,
@@ -189,7 +189,7 @@ export default function Terms() {
             <section className="space-y-4">
               <h2 className="text-2xl font-display font-black">Indemnification</h2>
               <p className="leading-relaxed">
-                You agree to indemnify, defend, and hold harmless Boss Hookah and its affiliates,
+                You agree to indemnify, defend, and hold harmless The Hookah Shop and its affiliates,
                 and their respective directors, officers, employees, and agents, from and against
                 any claims, damages, losses, liabilities, and expenses (including reasonable
                 attorneys&apos; fees) arising out of your use of the site, your breach of these
@@ -324,7 +324,7 @@ export default function Terms() {
                 <p className="mb-2">
                   <strong>Address:</strong>
                 </p>
-                <p>Boss Hookah Wholesale</p>
+                <p>The Hookah Shop</p>
                 <p>6520 Greenfield Rd</p>
                 <p>Dearborn, MI 48126</p>
               </div>

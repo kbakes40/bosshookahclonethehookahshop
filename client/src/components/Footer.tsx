@@ -62,7 +62,7 @@ export default function Footer() {
           {locationOpen && (
             <div className="pb-6 space-y-4">
               <div>
-                <p className="font-semibold">The Boss Hookah Wholesale</p>
+                <p className="font-semibold">The Hookah Shop</p>
                 <p>6520 Greenfield Rd</p>
                 <p>Dearborn, MI 48126</p>
                 <a href="tel:+13134066589" className="mt-2 inline-block hover:text-primary transition-colors">(313) 406-6589</a>
@@ -152,7 +152,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <p className="text-sm">© 2026, Boss Hookah Wholesale</p>
+          <p className="text-sm">© 2026, The Hookah Shop</p>
         </div>
       </div>
 

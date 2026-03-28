@@ -8,10 +8,10 @@ Your Google Business Profile is currently showing Instagram as the website. Let'
 
 1. **Go to Google Business Profile Manager**
    - Visit: https://business.google.com
-   - Sign in with the Google account that manages The Boss Hookah Wholesale
+   - Sign in with the Google account that manages The Hookah Shop
 
 2. **Select Your Business**
-   - Click on "The Boss Hookah Wholesale" profile
+   - Click on "The Hookah Shop" profile
 
 3. **Edit Business Information**
    - Click "Edit profile" or the pencil icon
@@ -46,7 +46,7 @@ Your profile has good photos, but adding more will help:
 Add a more detailed description with keywords:
 
 ```
-The Boss Hookah Wholesale is Dearborn's premier destination for premium hookahs, shisha tobacco, vapes, and smoking accessories. Located at 6520 Greenfield Rd, we offer an extensive selection of top brands including Al Fakher, Starbuzz, Geek Bar, and more. 
+The Hookah Shop is Dearborn's premier destination for premium hookahs, shisha tobacco, vapes, and smoking accessories. Located at 6520 Greenfield Rd, we offer an extensive selection of top brands including Al Fakher, Starbuzz, Geek Bar, and more. 
 
 We specialize in:
 • Premium Hookahs (Modern & Traditional)

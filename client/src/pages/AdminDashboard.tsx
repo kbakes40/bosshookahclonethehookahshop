@@ -264,7 +264,7 @@ export default function AdminDashboard() {
         )}
 
         <p className="text-center text-[10px] text-zinc-600 pt-4">
-          Boss Hookah Admin · {now.getFullYear()}
+          The Hookah Shop Admin · {now.getFullYear()}
         </p>
       </div>
     </AdminShell>

@@ -11,7 +11,7 @@ export default function AgeVerification() {
           <div className="brutalist-border bg-secondary p-12 text-left space-y-6">
             <p className="text-2xl font-display font-black">21+ only</p>
             <p className="leading-relaxed">
-              Boss Hookah Wholesale is an adult use retailer. Customers must be{" "}
+              The Hookah Shop is an adult use retailer. Customers must be{" "}
               <strong>21 years of age or older</strong> to purchase age-restricted products,
               including tobacco, shisha, and related goods sold on this site.
             </p>
@@ -33,7 +33,7 @@ export default function AgeVerification() {
               appropriate.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              By shopping with Boss Hookah, you confirm that you meet the legal age to purchase these
+              By shopping with The Hookah Shop, you confirm that you meet the legal age to purchase these
               products where you live and that you will comply with every verification step we or our
               partners require.
             </p>

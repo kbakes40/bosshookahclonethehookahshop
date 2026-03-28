@@ -35,7 +35,7 @@ export default function FloatingRewardsButton() {
           <div className="bg-background brutalist-border brutalist-shadow max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="bg-foreground text-background p-6 flex items-center justify-between border-b-3 border-border sticky top-0 z-10">
-              <h1 className="text-2xl font-display font-black">BOSS HOOKAH REWARDS</h1>
+              <h1 className="text-2xl font-display font-black">THE HOOKAH SHOP REWARDS</h1>
               <button
                 onClick={() => setIsOpen(false)}
                 className="hover:scale-110 transition-transform duration-150"

@@ -55,7 +55,7 @@ export default function AdminLogin() {
           >
             <Store className="h-6 w-6 text-[#d7ff3f]" strokeWidth={1.75} aria-hidden />
           </div>
-          <h1 className="text-xl font-bold text-zinc-50">Boss Hookah Admin</h1>
+          <h1 className="text-xl font-bold text-zinc-50">The Hookah Shop Admin</h1>
           <p className="text-xs text-zinc-500 mt-1">Sign in to your dashboard</p>
         </div>
 

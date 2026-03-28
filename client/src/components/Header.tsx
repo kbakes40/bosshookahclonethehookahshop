@@ -111,7 +111,7 @@ export default function Header() {
               
               <Link href="/" className="flex items-center gap-3">
                 <div className="font-display font-black text-2xl tracking-tight">
-                  BOSS HOOKAH
+                  THE HOOKAH SHOP
                   <span className="block text-xs font-bold tracking-wider text-primary">WHOLESALE</span>
                 </div>
               </Link>

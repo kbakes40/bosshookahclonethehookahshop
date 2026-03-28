@@ -11,7 +11,7 @@ export default function Contact() {
           <div className="brutalist-border bg-secondary p-12 space-y-8 text-left">
             <p className="text-lg leading-relaxed">
               Have a question about an order, a product, or a wholesale inquiry? Reach out — our team
-              is here to help. Boss Hookah Wholesale serves enthusiasts and retailers with the same
+              is here to help. The Hookah Shop serves enthusiasts and retailers with the same
               care we bring to our Dearborn showroom floor.
             </p>
 

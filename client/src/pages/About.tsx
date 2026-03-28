@@ -12,7 +12,7 @@ export default function About() {
             <div className="space-y-3">
               <h2 className="text-xl font-display font-black">Who we are</h2>
               <p className="leading-relaxed">
-                Boss Hookah Wholesale is a Dearborn-rooted retailer built for people who take their
+                The Hookah Shop is a Dearborn-rooted retailer built for people who take their
                 sessions seriously. From the neighborhood regular to the buyer stocking a lounge or
                 shop, we speak the language of quality bowls, clean draws, and gear that lasts —
                 because we live it every day on the showroom floor until 1:00 AM.

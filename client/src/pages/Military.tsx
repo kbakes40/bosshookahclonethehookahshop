@@ -11,7 +11,7 @@ export default function Military() {
           <div className="brutalist-border bg-secondary p-12">
             <p className="text-lg font-display font-black mb-4">Thank you for your service</p>
             <p className="mb-6 text-left leading-relaxed">
-              Boss Hookah Wholesale is proud to support active duty service members, veterans, and
+              The Hookah Shop is proud to support active duty service members, veterans, and
               military families. Eligibility and <strong>military verification may be required</strong>{" "}
               before a discount is applied — please have acceptable ID or verification materials ready
               when asked.
