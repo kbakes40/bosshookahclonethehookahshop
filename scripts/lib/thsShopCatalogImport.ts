@@ -740,9 +740,16 @@ export function patchHasEnrichment(patch: Record<string, unknown>): boolean {
 export async function upsertNewRowsBySku(client: SupabaseClient, rows: BhProductInsert[]): Promise<void> {
   if (rows.length === 0) return;
   const skus = rows.map(r => r.sku);
-  const { data: existing, error: selErr } = await client.from("bh_products").select("id,sku").in("sku", skus);
-  if (selErr) throw new Error(selErr.message);
-  const idBySku = new Map((existing ?? []).map(r => [String(r.sku), String((r as { id: string }).id)]));
+  const idBySku = new Map<string, string>();
+  const SKU_QUERY_CHUNK = 120;
+  for (let q = 0; q < skus.length; q += SKU_QUERY_CHUNK) {
+    const slice = skus.slice(q, q + SKU_QUERY_CHUNK);
+    const { data: existing, error: selErr } = await client.from("bh_products").select("id,sku").in("sku", slice);
+    if (selErr) throw new Error(selErr.message);
+    for (const r of existing ?? []) {
+      idBySku.set(String((r as { sku: string }).sku), String((r as { id: string }).id));
+    }
+  }
 
   const toInsert: BhProductInsert[] = [];
   for (const row of rows) {

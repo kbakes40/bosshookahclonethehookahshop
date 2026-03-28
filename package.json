@@ -30,7 +30,11 @@
     "import:ths-shop": "tsx scripts/import-ths-shop-catalog.ts",
     "import:ths-shop:apply": "tsx scripts/import-ths-shop-catalog.ts --apply",
     "import:ths-category": "tsx scripts/import-ths-category.ts",
-    "import:ths-category:apply": "tsx scripts/import-ths-category.ts --apply"
+    "import:ths-category:apply": "tsx scripts/import-ths-category.ts --apply",
+    "import:ths-hookahs": "tsx scripts/import-ths-category.ts --slug hookahs --store-category hookahs",
+    "import:ths-hookahs:apply": "tsx scripts/import-ths-category.ts --slug hookahs --store-category hookahs --apply",
+    "import:ths-shisha": "tsx scripts/import-ths-category.ts --slug shisha-tobacco --store-category shisha",
+    "import:ths-shisha:apply": "tsx scripts/import-ths-category.ts --slug shisha-tobacco --store-category shisha --apply"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

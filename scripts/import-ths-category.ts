@@ -6,10 +6,15 @@
  *
  * Dry run (no DB writes):
  *   pnpm exec tsx scripts/import-ths-category.ts
- *   pnpm exec tsx scripts/import-ths-category.ts --report ./reports/ths-vapes-dry-run.json
+ *   pnpm exec tsx scripts/import-ths-category.ts --slug hookahs --store-category hookahs --report ./reports/ths-hookahs-dry-run.json
+ *   pnpm exec tsx scripts/import-ths-category.ts --slug shisha-tobacco --store-category shisha --report ./reports/ths-shisha-dry-run.json
  *
  * Apply:
  *   pnpm exec tsx scripts/import-ths-category.ts --apply --report ./reports/ths-vapes-apply.json
+ *   pnpm exec tsx scripts/import-ths-category.ts --slug hookahs --store-category hookahs --apply --report ./reports/ths-hookahs-apply.json
+ *   pnpm exec tsx scripts/import-ths-category.ts --slug shisha-tobacco --store-category shisha --apply --report ./reports/ths-shisha-apply.json
+ *
+ * THS Woo top-level slugs (Store API): vapes, hookahs, shisha-tobacco, charcoal, hookah-accessories, …
  *
  * Env (--apply): VITE_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  * Migration: supabase/migrations/011_bh_products_import_source.sql
@@ -354,9 +359,17 @@ async function main(): Promise<void> {
 
   if (!apply) {
     console.log("\nDry run only — no database writes.");
+    const slugPart =
+      slug != null && `${slug}`.trim() !== "" && `${slug}`.trim() !== "vapes"
+        ? ` --slug ${`${slug}`.trim()}`
+        : "";
+    const catPart =
+      siteCategory !== "vapes"
+        ? ` --store-category ${siteCategory}`
+        : "";
     console.log("Run import with:");
     console.log(
-      `  pnpm exec tsx scripts/import-ths-category.ts --apply --report ./reports/ths-${siteCategory}-apply.json`
+      `  pnpm exec tsx scripts/import-ths-category.ts${slugPart}${catPart} --apply --report ./reports/ths-${siteCategory}-apply.json`
     );
     return;
   }
