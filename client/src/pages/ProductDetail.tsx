@@ -1,12 +1,16 @@
 // Product Detail Page - Neo-Brutalism meets Luxury Retail
 // Features: Image gallery, product info, add to cart, related products
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { getProductById as staticGetProductById, type Product } from "@/lib/products";
+import { getProductById as staticGetProductById, type Product, type ProductVariant } from "@/lib/products";
+import {
+  groupShishaVariantsByPackSize,
+  orderedShishaVariants,
+} from "@/lib/shishaVariantGroups";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -46,14 +50,31 @@ export default function ProductDetail() {
   );
   const relatedProducts = relatedQuery.data ?? [];
 
+  const shishaVariantGroups = useMemo(() => {
+    if (!product?.variants?.length || product.category?.toLowerCase() !== "shisha") return null;
+    return groupShishaVariantsByPackSize(product.variants);
+  }, [product?.variants, product?.category]);
+
+  const variantIdsKey =
+    product?.variants?.length && product.category?.toLowerCase() === "shisha"
+      ? orderedShishaVariants(product.variants)
+          .map(v => v.id)
+          .join("|")
+      : (product?.variants?.map(v => v.id).join("|") ?? "");
+
   useEffect(() => {
-    if (product?.variants?.length) {
-      setSelectedVariant(product.variants[0]!.id);
-    } else {
+    if (!product?.variants?.length) {
       setSelectedVariant("");
+      setSelectedImage(0);
+      return;
     }
+    const first =
+      product.category?.toLowerCase() === "shisha"
+        ? orderedShishaVariants(product.variants)[0]
+        : product.variants[0];
+    setSelectedVariant(first?.id ?? "");
     setSelectedImage(0);
-  }, [product?.id, product?.variants]);
+  }, [product?.id, product?.category, variantIdsKey]);
 
   if (product === undefined) {
     return (
@@ -194,29 +215,64 @@ export default function ProductDetail() {
                 )}
               </div>
 
-              {/* Flavor Variant Selector */}
+              {/* Flavor / pack-size variant selector */}
               {product.variants && product.variants.length > 0 && (
                 <div className="mb-6">
-                  <label className="block font-semibold mb-3">Select Flavor</label>
-                  <div className="flex flex-wrap gap-2">
-                    {product.variants.map((variant) => (
-                      <button
-                        key={variant.id}
-                        onClick={() => {
-                          setSelectedVariant(variant.id);
-                          setSelectedImage(0); // Reset to first image when variant changes
-                        }}
-                        className={`px-4 py-2.5 brutalist-border font-semibold transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 ${
-                          selectedVariant === variant.id
-                            ? "bg-primary text-primary-foreground brutalist-shadow"
-                            : "bg-background hover:bg-secondary"
-                        }`}
-                        title={variant.description}
-                      >
-                        {variant.name}
-                      </button>
-                    ))}
-                  </div>
+                  <label className="block font-semibold mb-3">
+                    {product.category?.toLowerCase() === "shisha" ? "Select size & flavor" : "Select Flavor"}
+                  </label>
+                  {shishaVariantGroups ? (
+                    <div className="space-y-5">
+                      {shishaVariantGroups.map(group => (
+                        <div key={group.heading}>
+                          <p className="text-xs font-black uppercase tracking-wide text-muted-foreground mb-2">
+                            {group.heading}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {group.variants.map((variant: ProductVariant) => (
+                              <button
+                                key={variant.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedVariant(variant.id);
+                                  setSelectedImage(0);
+                                }}
+                                className={`px-4 py-2.5 brutalist-border font-semibold transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 ${
+                                  selectedVariant === variant.id
+                                    ? "bg-primary text-primary-foreground brutalist-shadow"
+                                    : "bg-background hover:bg-secondary"
+                                }`}
+                                title={variant.description}
+                              >
+                                {variant.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.map((variant: ProductVariant) => (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedVariant(variant.id);
+                            setSelectedImage(0);
+                          }}
+                          className={`px-4 py-2.5 brutalist-border font-semibold transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 ${
+                            selectedVariant === variant.id
+                              ? "bg-primary text-primary-foreground brutalist-shadow"
+                              : "bg-background hover:bg-secondary"
+                          }`}
+                          title={variant.description}
+                        >
+                          {variant.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
