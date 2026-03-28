@@ -11,12 +11,11 @@ const DEV_PLACEHOLDER_KEY =
   "sk_test_0000000000000000000000000000000000000000000000000000000000";
 
 if (!ENV.stripeSecretKey) {
-  if (ENV.isProduction) {
-    throw new Error("STRIPE_SECRET_KEY is required");
-  }
-  console.warn(
-    "[Stripe] STRIPE_SECRET_KEY not set — checkout/webhooks will fail until you add it to .env.local"
-  );
+  const msg =
+    ENV.isProduction
+      ? "[Stripe] STRIPE_SECRET_KEY is not set — card checkout/webhooks will fail. Add it in Vercel → Environment Variables (catalog & Zelle still work)."
+      : "[Stripe] STRIPE_SECRET_KEY not set — checkout/webhooks will fail until you add it to .env.local";
+  console.warn(msg);
 }
 
 export const stripe = new Stripe(
