@@ -8,6 +8,7 @@ import {
 } from "./_core/supabaseEnv";
 import { supabaseAdmin } from "./_core/supabaseAdmin";
 import { BH_PRODUCT_STOREFRONT_LIST_COLUMNS } from "./storeCatalogColumns";
+import { decodeProductDescriptionForDisplay } from "@shared/htmlPlainText";
 
 export type BhProductRow = Record<string, unknown>;
 
@@ -103,7 +104,9 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
     return {
       id: vid,
       name: extractVariantLabel(String(r.name ?? "")),
-      description: r.description ? String(r.description) : undefined,
+      description: decodeProductDescriptionForDisplay(
+        r.description != null ? String(r.description) : undefined
+      ),
       image: r.image_url ? String(r.image_url) : undefined,
       ...(Number.isFinite(rowPrice) && rowPrice > 0 ? { price: rowPrice } : {}),
       ...(rowSale != null && Number.isFinite(rowSale) ? { salePrice: rowSale } : {}),
@@ -141,7 +144,9 @@ function mergeCatalogGroup(key: string, rows: BhProductRow[]): Product {
       inStock: rows.some(r => r.in_stock !== false),
       featured: rows.some(r => r.featured === true),
       trending: rows.some(r => r.trending === true),
-      description: descRow?.description ? String(descRow.description) : undefined,
+      description: decodeProductDescriptionForDisplay(
+        descRow?.description != null ? String(descRow.description) : undefined
+      ),
       variants: variants.length > 0 ? variants : undefined,
       ...(wLb != null ? { weightLb: wLb } : {}),
       ...(createdAt ? { createdAt } : {}),
@@ -168,7 +173,9 @@ export function mapNonCatalogRow(row: BhProductRow): Product {
     inStock: row.in_stock !== false,
     featured: Boolean(row.featured),
     trending: Boolean(row.trending),
-    description: row.description ? String(row.description) : undefined,
+    description: decodeProductDescriptionForDisplay(
+      row.description != null ? String(row.description) : undefined
+    ),
     ...(w != null ? { weightLb: w } : {}),
     ...(createdAt ? { createdAt } : {}),
     ...(sku ? { catalogSkus: [sku] } : {}),
