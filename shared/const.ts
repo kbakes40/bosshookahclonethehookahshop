@@ -1,6 +1,6 @@
 /** Default Supabase project URL. Override with `VITE_SUPABASE_URL` in env. */
 export const DEFAULT_SUPABASE_URL =
-  "https://sjmrdnrneknzqiojtevm.supabase.co";
+  "https://pahukiygqfdxinpwoeee.supabase.co";
 
 /**
  * Google Cloud Console → OAuth 2.0 client → Authorized redirect URIs (add exactly this).
