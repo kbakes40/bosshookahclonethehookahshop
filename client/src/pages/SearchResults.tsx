@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export default function SearchResults() {
   const [location] = useLocation();
@@ -32,7 +31,8 @@ export default function SearchResults() {
     {
       enabled: q.length > 0,
       staleTime: 30_000,
-      placeholderData: keepPreviousData,
+      retry: 2,
+      refetchOnWindowFocus: false,
     }
   );
 

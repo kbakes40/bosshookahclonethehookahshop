@@ -15,10 +15,25 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       async headers() {
-        // Attach the Supabase access token so the backend can verify the user
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-          return { Authorization: `Bearer ${session.access_token}` };
+        /**
+         * Attach Supabase JWT when available. Cap wait so a stuck getSession() never blocks
+         * public catalog tRPC calls (category pages would stay "Loading" forever).
+         */
+        try {
+          type GetSession = Awaited<ReturnType<typeof supabase.auth.getSession>>;
+          const timeoutFallback = new Promise<GetSession>(resolve =>
+            setTimeout(
+              () => resolve({ data: { session: null }, error: null } as GetSession),
+              2_000
+            )
+          );
+          const { data } = await Promise.race([supabase.auth.getSession(), timeoutFallback]);
+          const session = data?.session;
+          if (session?.access_token) {
+            return { Authorization: `Bearer ${session.access_token}` };
+          }
+        } catch {
+          /* storefront queries remain public without Authorization */
         }
         return {};
       },

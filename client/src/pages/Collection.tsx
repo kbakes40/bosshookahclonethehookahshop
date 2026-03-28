@@ -8,7 +8,6 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { keepPreviousData } from "@tanstack/react-query";
 
 const TOP_LEVEL_CATEGORY = new Set([
   "hookahs",
@@ -36,7 +35,13 @@ function categoryFromPath(location: string): string {
 
 export default function Collection() {
   const [location] = useLocation();
-  const category = useMemo(() => categoryFromPath(location), [location]);
+  /** Prefer real pathname so category tracks SPA navigation even if hook state lags. */
+  const category = useMemo(() => {
+    if (typeof window !== "undefined") {
+      return categoryFromPath(window.location.pathname);
+    }
+    return categoryFromPath(location);
+  }, [location]);
 
   const [priceMin, setPriceMin] = useState("0");
   const [priceMax, setPriceMax] = useState("999");
@@ -67,12 +72,14 @@ export default function Collection() {
     },
     {
       staleTime: 60_000,
-      placeholderData: keepPreviousData,
+      retry: 2,
+      refetchOnWindowFocus: false,
     }
   );
 
   const data = catalogQuery.data;
   const filteredProducts = data?.products ?? [];
+  const hasServerData = data != null;
   const inStockCount = data?.inStockCount ?? 0;
   const outOfStockCount = data?.outOfStockCount ?? 0;
   const totalFiltered = data?.total ?? 0;
@@ -197,7 +204,7 @@ export default function Collection() {
             <div className="flex-1">
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {catalogQuery.isPending && filteredProducts.length === 0 && !catalogQuery.error
+                  {catalogQuery.isPending && !hasServerData && !catalogQuery.isError
                     ? "Loading products…"
                     : `${totalFiltered} products`}
                 </p>
@@ -205,7 +212,14 @@ export default function Collection() {
 
               {catalogQuery.isError && (
                 <p className="text-sm text-destructive mb-4">
-                  Could not load products. Please refresh the page.
+                  Could not load products.{` `}
+                  <button
+                    type="button"
+                    className="underline font-semibold"
+                    onClick={() => void catalogQuery.refetch()}
+                  >
+                    Retry
+                  </button>
                 </p>
               )}
 
@@ -229,7 +243,7 @@ export default function Collection() {
                 </div>
               )}
 
-              {!catalogQuery.isPending &&
+              {hasServerData &&
                 !catalogQuery.isFetching &&
                 filteredProducts.length === 0 &&
                 !catalogQuery.error && (

@@ -6,12 +6,12 @@ import { trpc } from "@/lib/trpc";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export default function BrandCollection() {
   const [location] = useLocation();
-
-  const pathParts = location.split("/").filter(Boolean);
+  const pathForParse =
+    typeof window !== "undefined" ? window.location.pathname : location;
+  const pathParts = pathForParse.split("/").filter(Boolean);
   const category = pathParts[0];
   const brandSlug = pathParts[1];
 
@@ -41,7 +41,8 @@ export default function BrandCollection() {
     {
       enabled: Boolean(category && brandName),
       staleTime: 60_000,
-      placeholderData: keepPreviousData,
+      retry: 2,
+      refetchOnWindowFocus: false,
     }
   );
 
