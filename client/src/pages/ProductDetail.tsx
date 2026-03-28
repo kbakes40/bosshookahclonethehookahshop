@@ -33,7 +33,7 @@ function plainTextFromHtml(html: string, maxLen: number): string {
     .replace(/&amp;/gi, "&")
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"")
+    .replace(/&quot;/gi, "\u0022")
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
     .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
     .replace(/\s+/g, " ")
